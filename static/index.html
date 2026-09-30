@@ -1,0 +1,1035 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TheWatcher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #edf0f3; --surface: #ffffff; --sunk: #f5f7f9;
+    --ink: #16233a; --muted: #5b6678; --line: #d5dbe3;
+    --good: #0e7c66; --good-soft: #dcf1ea;
+    --warm: #a8620a; --warm-soft: #fbeedb;
+    --cold: #8a94a6; --bad: #b42318; --bad-soft: #fde8e6;
+    --radius: 8px;
+    --font: "Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141b26; --surface: #1c2533; --sunk: #18202c;
+      --ink: #e6ebf2; --muted: #9aa6b8; --line: #2c3748;
+      --good: #3cc3a0; --good-soft: #173a33; --warm: #f0a93b; --warm-soft: #3a2d17;
+      --cold: #6c778a; --bad: #ff8a7a; --bad-soft: #3d201d;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font); font-variant-numeric: tabular-nums; }
+  a { color: inherit; }
+  button, input { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--good); outline-offset: 2px; }
+
+  header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+           padding: 18px 28px; border-bottom: 1px solid var(--line); background: var(--surface); }
+  header h1 { font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+  .status { color: var(--muted); font-size: 14px; flex: 1; min-width: 200px; }
+  .btn { border: 1px solid var(--line); background: var(--surface); padding: 7px 14px;
+         border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; }
+  .btn:hover { border-color: var(--muted); }
+  .btn.primary { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+  .btn.small { padding: 3px 9px; font-size: 13px; }
+  .btn:disabled { opacity: .5; cursor: default; }
+
+  .layout { display: grid; grid-template-columns: 340px 1fr; gap: 24px; padding: 24px 28px;
+            max-width: 1360px; margin: 0 auto; align-items: start; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; padding: 16px; }
+    .layout main { order: -1; }
+    header { padding: 14px 16px; }
+  }
+  @media (max-width: 560px) {
+    .job { grid-template-columns: 1fr; }
+    .job-right { justify-self: start; }
+  }
+
+  aside section { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+                  padding: 16px; margin-bottom: 16px; }
+  aside h2 { font-size: 15px; margin: 0 0 10px; font-weight: 600; }
+  .hint { color: var(--muted); font-size: 13px; margin: 0 0 10px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 8px 0 4px; }
+  input[type=text], input[type=url], input[type=number] {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--sunk); }
+  .row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+
+  .drop { border: 1.5px dashed var(--line); border-radius: 6px; padding: 14px; text-align: center;
+          cursor: pointer; color: var(--muted); font-size: 14px; }
+  .drop.over, .drop:hover { border-color: var(--good); color: var(--ink); }
+  .resume-file { font-weight: 600; word-break: break-all; }
+
+  .company { padding: 10px 0; border-top: 1px solid var(--line); }
+  .company:first-of-type { border-top: 0; }
+  .company-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .company-name { font-weight: 600; }
+  .company-meta { font-size: 13px; color: var(--muted); }
+  .company-meta .err { color: var(--bad); }
+  .company-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .tag { font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; }
+  details.hook { font-size: 13px; margin-top: 6px; color: var(--muted); }
+  details.hook .steps { margin: 6px 0; padding-left: 18px; word-break: break-word; }
+  details.hook code { display: block; background: var(--sunk); padding: 6px 8px; border-radius: 4px;
+                      word-break: break-all; margin: 6px 0; color: var(--ink); font-size: 12px; }
+
+  .stage { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 6px;
+           overflow: hidden; margin-bottom: 6px; }
+  .stage input { position: absolute; opacity: 0; pointer-events: none; }
+  .stage label { margin: 0; padding: 8px 6px; text-align: center; cursor: pointer; color: var(--muted);
+                 font-size: 14px; font-weight: 500; }
+  .stage label:last-of-type { border-left: 1px solid var(--line); }
+  .stage input:checked + label { background: var(--ink); color: var(--surface); }
+  .stage input:focus-visible + label { outline: 2px solid var(--good); outline-offset: -2px; }
+  [data-for] { display: none; }
+  [data-stage=fresher] [data-for=fresher], [data-stage=experienced] [data-for=experienced] { display: block; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .check { display: flex; gap: 8px; align-items: center; color: var(--ink); font-size: 14px; margin-top: 10px; }
+
+  .levels { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .level-btn { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 14px;
+               cursor: pointer; font-size: 14px; font-weight: 500; color: var(--muted); }
+  .level-btn[aria-pressed=true] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+  .level-btn .n { opacity: .75; margin-left: 4px; font-weight: 400; }
+  .lvl { font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px;
+         padding: 0 6px; margin-left: 8px; white-space: nowrap; vertical-align: 1px; }
+
+  .starter-sum { font-size: 14px; margin: 0 0 10px; }
+  .starter-tools { display: flex; gap: 8px; margin-bottom: 8px; }
+  .starter-tools input { flex: 1; }
+  details.group { border-top: 1px solid var(--line); }
+  details.group > summary { list-style: none; cursor: pointer; padding: 10px 0; display: flex; justify-content: space-between;
+                            align-items: center; gap: 8px; font-weight: 600; font-size: 14px; }
+  details.group > summary::-webkit-details-marker { display: none; }
+  details.group > summary::before { content: "▸"; color: var(--muted); margin-right: 6px; font-size: 12px; }
+  details.group[open] > summary::before { content: "▾"; }
+  .group-title { flex: 1; }
+  .group-count { color: var(--muted); font-weight: 400; font-size: 13px; }
+  .sc { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; padding: 8px 0 8px 2px;
+        border-top: 1px dashed var(--line); font-size: 14px; }
+  .sc input { margin-top: 3px; }
+  .sc-name { font-weight: 500; }
+  .sc.paused .sc-name { color: var(--muted); }
+  .sc-meta { grid-column: 2; font-size: 12.5px; color: var(--muted); }
+  .sc-meta .err { color: var(--bad); }
+  .sc-actions { grid-column: 2; display: flex; gap: 2px 12px; flex-wrap: wrap; font-size: 12.5px; line-height: 1.6; }
+  .linkbtn { background: none; border: 0; padding: 0; color: var(--ink); text-decoration: underline; cursor: pointer; font-size: inherit; }
+  .setup { background: var(--warm-soft); border: 1px solid var(--warm); border-radius: var(--radius);
+           padding: 12px 16px; margin-bottom: 18px; font-size: 14px; }
+  .setup ul { margin: 6px 0 0; padding-left: 18px; }
+
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 4px; flex-wrap: wrap; }
+  .tab { background: none; border: 0; padding: 8px 14px; cursor: pointer; color: var(--muted);
+         border-bottom: 2px solid transparent; margin-bottom: -1px; font-weight: 500; }
+  .tab[aria-selected=true] { color: var(--ink); border-bottom-color: var(--ink); }
+  .tab .n { color: var(--muted); font-weight: 400; margin-left: 4px; }
+
+  .job { display: grid; grid-template-columns: 1fr auto; gap: 6px 20px; padding: 14px 4px;
+         border-bottom: 1px solid var(--line); cursor: pointer; }
+  .job:hover { background: color-mix(in srgb, var(--surface) 60%, transparent); }
+  .job-title { font-weight: 600; font-size: 16px; text-decoration: none; }
+  .job-title:hover { text-decoration: underline; }
+  .job-sub { color: var(--muted); font-size: 14px; }
+  .new { font-size: 12px; font-weight: 600; color: var(--good); margin-left: 8px; }
+  .job-right { display: flex; align-items: center; gap: 14px; justify-self: end; }
+  .verdict { font-size: 13px; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+  .v-eligible { background: var(--good-soft); color: var(--good); }
+  .v-related { background: var(--warm-soft); color: var(--warm); }
+  .v-not_related { color: var(--cold); }
+  .v-pending { color: var(--muted); border: 1px dashed var(--line); }
+  .v-error, .v-failed { background: var(--bad-soft); color: var(--bad); }
+  .facts { margin-top: 6px; }
+  .review { background: var(--warm-soft); border: 1px solid var(--warm); border-radius: var(--radius);
+            padding: 12px 16px; margin-bottom: 18px; font-size: 14px; display: flex; gap: 12px;
+            align-items: center; flex-wrap: wrap; }
+  .review p { margin: 0; flex: 1; min-width: 220px; }
+  .profile-sum { font-size: 14px; margin: 8px 0 10px; }
+  .profile-sum dt { color: var(--muted); font-size: 12.5px; }
+  .profile-sum dd { margin: 0 0 4px; }
+  .badge { font-size: 12px; font-weight: 600; color: var(--warm); margin-left: 6px; }
+
+  dialog { border: 1px solid var(--line); border-radius: var(--radius); padding: 0; background: var(--surface);
+           color: var(--ink); width: min(720px, calc(100vw - 32px)); max-height: calc(100vh - 32px); }
+  dialog::backdrop { background: rgb(10 16 26 / .55); }
+  dialog form { padding: 20px 22px; }
+  dialog h2 { margin: 0 0 4px; font-size: 19px; }
+  dialog h3 { font-size: 14px; margin: 18px 0 6px; }
+  .three { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  select, textarea { font: inherit; color: inherit; width: 100%; padding: 8px 10px; border: 1px solid var(--line);
+                     border-radius: 6px; background: var(--sunk); }
+  textarea { resize: vertical; min-height: 64px; }
+  input[type=month] { font: inherit; color: inherit; width: 100%; padding: 6px 8px; border: 1px solid var(--line);
+                      border-radius: 6px; background: var(--sunk); }
+  .wh { display: grid; grid-template-columns: 1.3fr 1.1fr 1fr 1fr auto; gap: 6px; align-items: end;
+        padding: 8px 0; border-top: 1px dashed var(--line); }
+  .wh label { margin: 0 0 2px; font-size: 12px; }
+  .wh .opts { grid-column: 1 / -1; display: flex; gap: 16px; font-size: 13px; }
+  .wh .opts label { display: flex; gap: 6px; align-items: center; color: var(--ink); margin: 0; font-size: 13px; }
+  .dlg-foot { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; flex-wrap: wrap; }
+  .field-hint { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .fieldopts { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; margin-top: 6px; }
+  .fieldopts label { display: flex; gap: 8px; align-items: center; color: var(--ink); font-size: 14px; margin: 4px 0; }
+  @media (max-width: 620px) { .fieldopts { grid-template-columns: 1fr; } }
+  @media (max-width: 620px) {
+    .three { grid-template-columns: 1fr 1fr; }
+    .wh { grid-template-columns: 1fr 1fr; }
+    .wh .rm { grid-column: 1 / -1; justify-self: start; }
+  }
+
+  /* The fit meter: four segments that fill with the 0 to 4 fit score. */
+  .meter { display: flex; align-items: center; gap: 8px; }
+  .meter-bars { display: flex; gap: 3px; }
+  .meter-bars i { width: 16px; height: 8px; border-radius: 2px; background: var(--line); position: relative; overflow: hidden; }
+  .meter-bars i::after { content: ""; position: absolute; inset: 0; width: var(--f, 0%); background: var(--meter, var(--ink)); }
+  .meter-num { font-size: 13px; color: var(--muted); width: 2.2em; text-align: right; }
+
+  .job-detail { grid-column: 1 / -1; display: none; font-size: 14px; }
+  .job.open .job-detail { display: block; }
+  .job-detail ul { margin: 6px 0 8px; padding-left: 18px; }
+  .job-detail .apply { display: inline-block; margin-top: 2px; font-weight: 600; }
+  .job-detail .meta { color: var(--muted); font-size: 13px; }
+
+  .empty { padding: 48px 12px; text-align: center; color: var(--muted); }
+  .empty strong { display: block; color: var(--ink); font-size: 16px; margin-bottom: 4px; }
+
+  .log { margin-top: 28px; }
+  .log h2 { font-size: 15px; margin: 0 0 8px; }
+  .log ol { list-style: none; margin: 0; padding: 0; font-size: 13px; color: var(--muted);
+            max-height: 220px; overflow: auto; }
+  .log li { padding: 3px 0; }
+  .log .error { color: var(--bad); }
+  .log .warn { color: var(--warm); }
+  .log time { display: inline-block; min-width: 72px; }
+
+  /* Sign-in screen. The dashboard stays hidden until you're signed in. */
+  body.locked header .signed-in, body.locked .layout { display: none; }
+  .auth { display: none; max-width: 380px; margin: 64px auto; padding: 0 16px; }
+  body.locked .auth { display: block; }
+  .auth form { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+  .auth h2 { margin: 0 0 4px; font-size: 19px; }
+  .auth-brand { text-align: center; margin: 0 0 18px; }
+  .auth-brand h2 { font-size: 22px; }
+  .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 6px;
+               overflow: hidden; margin-bottom: 16px; }
+  .auth-tabs button { border: 0; background: var(--surface); padding: 9px 6px; cursor: pointer; font-weight: 500;
+                      color: var(--muted); }
+  .auth-tabs button + button { border-left: 1px solid var(--line); }
+  .auth-tabs button[aria-selected=true] { background: var(--ink); color: var(--surface); }
+  .auth-tabs button:disabled { cursor: not-allowed; opacity: .5; }
+  .auth .switch { text-align: center; font-size: 13px; color: var(--muted); margin: 14px 0 0; }
+  .auth .forgot { text-align: right; margin: 6px 0 0; font-size: 13px; }
+  .auth .ok { color: var(--good); font-size: 13px; margin: 10px 0 0; }
+  #acctDlg { width: min(440px, calc(100vw - 32px)); }
+  #acctDlg h3 { border-top: 1px solid var(--line); padding-top: 14px; }
+  .auth .btn { width: 100%; margin-top: 16px; padding: 9px 14px; }
+  .err { color: var(--bad); font-size: 13px; margin: 10px 0 0; min-height: 1em; }
+  header .signed-in { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .who { color: var(--muted); font-size: 13px; }
+  input[type=password], input[type=email] { width: 100%; padding: 8px 10px; border: 1px solid var(--line);
+    border-radius: 6px; background: var(--sunk); }
+
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ink);
+           color: var(--surface); padding: 10px 16px; border-radius: 6px; font-size: 14px; opacity: 0;
+           transition: opacity .2s; pointer-events: none; max-width: 90vw; }
+  .toast.show { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+</style>
+</head>
+<body class="locked">
+<header>
+  <h1>TheWatcher</h1>
+  <div class="status signed-in" id="status">Loading…</div>
+  <div class="signed-in">
+    <button class="btn primary" id="checkAll">Check all companies now</button>
+    <span class="who" id="who"></span>
+    <button class="btn small" id="changePw">Account</button>
+    <button class="btn small" id="logout">Log out</button>
+  </div>
+</header>
+
+<div class="auth">
+  <div class="auth-brand"><h2>TheWatcher</h2>
+    <p class="hint">Get an email when a company posts a job that fits your resume.</p></div>
+  <form id="authForm" data-mode="login">
+    <div class="auth-tabs" role="tablist" aria-label="Log in or create an account">
+      <button type="button" role="tab" id="tabLogin" aria-selected="true" data-auth-mode="login">Log in</button>
+      <button type="button" role="tab" id="tabSignup" aria-selected="false" data-auth-mode="signup">Create account</button>
+    </div>
+    <h2 id="authTitle" hidden></h2>
+    <p class="hint" id="authIntro"></p>
+    <div data-show="login signup forgot">
+      <label for="aUser">Username</label>
+      <input type="text" id="aUser" autocomplete="username" maxlength="60">
+    </div>
+    <div data-show="signup">
+      <label for="aEmail">Your email (for job alerts and password resets)</label>
+      <input type="email" id="aEmail" autocomplete="email" maxlength="254" placeholder="you@example.com">
+    </div>
+    <div data-show="login signup reset">
+      <label for="aPass" id="aPassLabel">Password</label>
+      <input type="password" id="aPass" autocomplete="current-password" maxlength="200">
+    </div>
+    <p class="forgot" data-show="login"><button type="button" class="linkbtn" data-auth-mode="forgot">Forgot password?</button></p>
+    <div data-show="signup reset">
+      <label for="aPass2">Type the password again</label>
+      <input type="password" id="aPass2" autocomplete="new-password" maxlength="200">
+    </div>
+    <p class="err" id="authErr" role="alert"></p>
+    <p class="ok" id="authOk" role="status" hidden></p>
+    <button class="btn primary" type="submit" id="authBtn">Log in</button>
+    <p class="switch" id="authSwitch"></p>
+  </form>
+</div>
+
+<div class="layout">
+  <aside>
+    <section>
+      <h2>Your resume and profile</h2>
+      <div id="resumeInfo" class="hint">No resume yet. Jobs are saved but not scored until you add one.</div>
+      <div id="profileSum"></div>
+      <div class="drop" id="drop" tabindex="0" role="button">Drop a PDF or DOCX here, or click to choose</div>
+      <input type="file" id="resumeFile" accept=".pdf,.docx,.txt,.md" hidden>
+      <div class="row"><button class="btn" id="editProfile">Review or edit profile</button></div>
+    </section>
+
+    <section>
+      <h2>Job preferences</h2>
+      <p class="hint">Saving re-scores every open job.</p>
+      <label class="check"><input type="checkbox" id="internships" checked> Include internships (fresher profile)</label>
+      <label class="check"><input type="checkbox" id="indiaOnly" checked> Only jobs in India, or remote jobs open to India</label>
+      <label for="locations">Places you can work</label>
+      <input type="text" id="locations" placeholder="e.g. Delhi NCR, Bengaluru, remote in India">
+      <div class="row"><button class="btn" id="savePrefs">Save preferences</button></div>
+    </section>
+
+    <section>
+      <h2>Companies</h2>
+      <form id="addForm">
+        <label for="cName">Company name</label>
+        <input type="text" id="cName" required maxlength="120" placeholder="e.g. Razorpay">
+        <label for="cUrl">Careers page link</label>
+        <input type="url" id="cUrl" required placeholder="https://jobs.lever.co/…">
+        <div class="row"><button class="btn primary" type="submit">Start watching</button></div>
+      </form>
+      <div id="companies" style="margin-top:14px"></div>
+    </section>
+
+    <section>
+      <h2>Starter list</h2>
+      <p class="starter-sum hint" id="starterSum"></p>
+      <div class="starter-tools">
+        <input type="text" id="starterSearch" placeholder="Find a company" aria-label="Find a company in the starter list">
+      </div>
+      <div id="starter"></div>
+    </section>
+
+    <section>
+      <h2>Email alerts</h2>
+      <p class="hint" id="emailInfo"></p>
+      <label for="alertEmails">Send alerts to (separate several with commas)</label>
+      <input type="text" id="alertEmails" inputmode="email" autocomplete="email" placeholder="you@example.com">
+      <div class="row">
+        <button class="btn" id="saveEmails">Save addresses</button>
+        <button class="btn" id="testEmail">Send a test email</button>
+      </div>
+    </section>
+  </aside>
+
+  <main>
+    <div id="reviewBanner"></div>
+    <div id="setup"></div>
+    <div class="levels" id="levels" role="group" aria-label="Job level"></div>
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div id="jobs"></div>
+    <div class="log">
+      <h2>Activity</h2>
+      <ol id="events"></ol>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<dialog id="profileDlg" aria-labelledby="dlgTitle">
+  <form id="profileForm" method="dialog">
+    <h2 id="dlgTitle">Is this right?</h2>
+    <p class="hint" id="dlgIntro"></p>
+
+    <div class="stage" role="radiogroup" aria-label="Career stage">
+      <input type="radio" name="pstage" id="pFresher" value="fresher"><label for="pFresher">I'm a fresher</label>
+      <input type="radio" name="pstage" id="pExp" value="experienced"><label for="pExp">I'm experienced</label>
+    </div>
+
+    <label for="pDegree">Degree and branch</label>
+    <input type="text" id="pDegree" maxlength="200" placeholder="e.g. B.Tech, Computer Science">
+    <div class="three">
+      <div><label for="pGrad">Graduation year</label>
+        <input type="number" id="pGrad" min="1970" max="2040" placeholder="e.g. 2026"></div>
+      <div><label for="pCgpa">CGPA</label>
+        <input type="number" id="pCgpa" min="0" max="10" step="0.01" placeholder="e.g. 8.1"></div>
+      <div><label for="pScale">CGPA out of</label>
+        <select id="pScale"><option value="10">10</option><option value="4">4</option></select></div>
+      <div><label for="pPct">Percentage</label>
+        <input type="number" id="pPct" min="0" max="100" step="0.1" placeholder="if marks, not CGPA"></div>
+      <div><label for="pRole">Current role</label>
+        <input type="text" id="pRole" maxlength="200" placeholder="blank if a student"></div>
+      <div><label for="pYears">Years of full-time work</label>
+        <input type="number" id="pYears" min="0" max="60" step="0.1">
+        <div class="field-hint" id="pYearsHint">Worked out from your jobs below. Type to override.</div></div>
+    </div>
+
+    <h3>Work history</h3>
+    <div id="whRows"></div>
+    <button type="button" class="btn small" id="addWork">Add a job or internship</button>
+
+    <label for="pSkills">Skills, separated by commas</label>
+    <textarea id="pSkills" maxlength="3000"></textarea>
+    <label for="pProjects">Projects, one per line (what it does and the tools used)</label>
+    <textarea id="pProjects" maxlength="4000"></textarea>
+    <label for="pCourses">Coursework, separated by commas</label>
+    <input type="text" id="pCourses" maxlength="1500" placeholder="e.g. Data Structures, DBMS, Machine Learning">
+    <h3>Fields you work in</h3>
+    <p class="field-hint">Jobs in other fields are marked Not a fit without spending any Gemini quota.
+      Leave all unticked to let Kev work it out from your profile.</p>
+    <div id="pFields" class="fieldopts"></div>
+    <label for="pBased">Where you're based, separated by commas</label>
+    <input type="text" id="pBased" maxlength="500" placeholder="e.g. Pune">
+
+    <div class="dlg-foot">
+      <button type="button" class="btn" id="dlgLater">Check later</button>
+      <button type="submit" class="btn primary" id="dlgSave">Yes, this is correct. Save</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="acctDlg" aria-labelledby="acctTitle">
+  <form id="acctEmailForm" method="dialog">
+    <h2 id="acctTitle">Your account</h2>
+    <label for="acctEmail">Account email</label>
+    <input type="email" id="acctEmail" autocomplete="email" maxlength="254" placeholder="you@example.com">
+    <p class="field-hint" id="acctEmailHint">A password-reset link goes here if you forget your password. Job alerts go to the addresses under Email alerts.</p>
+    <p class="err" id="acctErr" role="alert"></p>
+    <div class="dlg-foot" style="margin-top:6px"><button type="submit" class="btn">Save email</button></div>
+  </form>
+  <form id="pwForm" method="dialog" style="padding-top:0">
+    <h3>Change password</h3>
+    <p class="hint">Other browsers signed in to this account are signed out.</p>
+    <label for="pwCur">Current password</label>
+    <input type="password" id="pwCur" autocomplete="current-password" required maxlength="200">
+    <label for="pwNew">New password (at least 8 characters)</label>
+    <input type="password" id="pwNew" autocomplete="new-password" required minlength="8" maxlength="200">
+    <label for="pwNew2">Type it again</label>
+    <input type="password" id="pwNew2" autocomplete="new-password" required minlength="8" maxlength="200">
+    <p class="err" id="pwErr" role="alert"></p>
+    <div class="dlg-foot">
+      <button type="button" class="btn" id="pwCancel">Close</button>
+      <button type="submit" class="btn primary">Change password</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const TABS = [
+  ["eligible", "Eligible"], ["related", "Related"], ["", "All open jobs"], ["pending", "Not scored yet"],
+];
+const VERDICT_LABEL = { eligible: "Eligible", related: "Related", not_related: "Not a fit", wrong_level: "Not your level", pending: "Not scored", error: "Will retry", failed: "Scoring failed" };
+const LEVEL_GROUPS = [["fresher", "Fresher & internship roles"], ["experienced", "Experienced roles"], ["", "All roles"]];
+const LEVEL_LABEL = { internship: "Internship", fresher: "Fresher", experienced: "Experienced", senior: "Senior" };
+let tab = "eligible", level = null, openJob = null, state = null, prefsLoaded = false, reviewShown = false, emailsLoaded = false;
+
+function ago(iso) {
+  if (!iso) return "never";
+  const s = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (s < 60) return "just now";
+  if (s < 3600) return `${Math.round(s / 60)} min ago`;
+  if (s < 86400) return `${Math.round(s / 3600)} h ago`;
+  return `${Math.round(s / 86400)} d ago`;
+}
+function until(iso) {
+  if (!iso) return "";
+  const m = Math.max(0, Math.round((new Date(iso).getTime() - Date.now()) / 60000));
+  return m <= 1 ? "in a minute" : `in ${m} min`;
+}
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 3200);
+}
+async function api(path, opts = {}) {
+  const r = await fetch(path, opts);
+  if (r.status === 401 && !path.startsWith("/api/auth/")) { showAuth("login"); throw new Error("Please log in."); }
+  if (!r.ok) {
+    let msg = `Request failed (${r.status})`;
+    try { const j = await r.json(); msg = j.detail?.[0]?.msg || j.detail || msg; } catch {}
+    throw new Error(msg);
+  }
+  return r.json();
+}
+
+function meter(score, verdict) {
+  const color = verdict === "eligible" ? "var(--good)" : verdict === "related" ? "var(--warm)" : "var(--cold)";
+  const v = Math.max(0, Math.min(4, score ?? 0));
+  const bars = [0, 1, 2, 3].map((i) => `<i style="--f:${Math.max(0, Math.min(1, v - i)) * 100}%;--meter:${color}"></i>`).join("");
+  return `<span class="meter" title="Fit ${v.toFixed(1)} out of 4"><span class="meter-bars">${bars}</span>
+          <span class="meter-num">${score == null ? "–" : v.toFixed(1)}</span></span>`;
+}
+
+function profileSummary(p) {
+  const pr = p.confirmed;
+  if (!pr) return "";
+  const grade = [pr.cgpa && `CGPA ${pr.cgpa}${pr.cgpa_scale ? `/${pr.cgpa_scale}` : ""}`, pr.percentage && `${pr.percentage}%`].filter(Boolean).join(", ");
+  const rows = [
+    ["Stage", pr.career_stage === "fresher" ? "Fresher" : "Experienced"],
+    ["Education", [pr.degree, pr.graduation_year && `graduating ${pr.graduation_year}`, grade].filter(Boolean).join(", ")],
+    ["Work", [pr.current_role, pr.years_experience != null && `${pr.years_experience} years full-time`].filter(Boolean).join(", ")],
+    ["Skills", (pr.skills || []).slice(0, 8).join(", ") + ((pr.skills || []).length > 8 ? "…" : "")],
+  ].filter(([, v]) => v);
+  return `<dl class="profile-sum">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}</dl>`;
+}
+
+function renderState() {
+  const s = state.settings;
+  const checking = state.checking.length;
+  $("status").textContent = checking
+    ? `Checking ${checking} compan${checking === 1 ? "y" : "ies"}…`
+    : `${state.profile.career_stage === "fresher" ? "Fresher" : "Experienced"} profile. Checks every ${s.interval_minutes} min, next ${until(s.next_check_at)}.`
+      + (s.gemini_ready ? ` Gemini ${s.gemini_usage.used} of ${s.gemini_usage.limit} today.` : "");
+
+  const missing = [];
+  if (!state.resume) missing.push("Add your resume so new jobs can be scored.");
+  if (!s.kev_ready) missing.push("Set KEV_BASE_URL in the .env file to your Kev server, then restart.");
+  if (!s.email_ready) missing.push("Add SMTP settings to the .env file to get email alerts.");
+  if (!state.companies.some((c) => c.active)) missing.push("Add a company's careers page, or resume some starter-list companies.");
+  if (!s.gemini_ready) missing.push("Optional: add a free GEMINI_API_KEY to the .env file so years, batch and marks are read from postings and your resume more accurately.");
+  $("setup").innerHTML = missing.length
+    ? `<div class="setup"><strong>Finish setting up</strong><ul>${missing.map((m) => `<li>${esc(m)}</li>`).join("")}</ul></div>` : "";
+
+  $("resumeInfo").innerHTML = state.resume
+    ? `<span class="resume-file">${esc(state.resume.filename)}</span><br>Uploaded ${ago(state.resume.uploaded_at)}. Drop a new file to replace it.${state.profile.needs_review ? `<span class="badge">Profile not checked yet</span>` : ""}`
+    : "No resume yet. Jobs are saved but not scored until you add one.";
+
+  $("profileSum").innerHTML = profileSummary(state.profile);
+  $("reviewBanner").innerHTML = state.resume && state.profile.needs_review
+    ? `<div class="review"><p><strong>Check your profile.</strong> Your new resume was read, but it isn't used for scoring until you confirm the details are right.</p>
+       <button class="btn primary" data-review>Review profile</button></div>` : "";
+  if (state.resume && state.profile.needs_review && !reviewShown) { reviewShown = true; openProfile(); }
+
+  if (!prefsLoaded) {
+    const p = state.preferences;
+    $("locations").value = p.locations || "";
+    $("internships").checked = p.include_internships ?? true;
+    $("indiaOnly").checked = p.india_only ?? true;
+    prefsLoaded = true;
+  }
+  $("levels").innerHTML = LEVEL_GROUPS.map(([key, label]) =>
+    `<button class="level-btn" aria-pressed="${level === key}" data-level="${key}">${label}<span class="n">${state.level_counts[key || "all"] || 0}</span></button>`).join("");
+
+  $("emailInfo").textContent = !s.email_ready
+    ? "Add SMTP_USER and SMTP_PASSWORD to the .env file to send alerts. Matches still show here."
+    : s.alert_emails.length
+    ? `Alerts go to ${s.alert_email} when a newly posted job looks like a fit${s.alert_emails_saved ? "" : " (from ALERT_EMAIL_TO in .env)"}.`
+    : "Add an address below to get alerts.";
+  if (!emailsLoaded) { $("alertEmails").value = s.alert_emails.join(", "); emailsLoaded = true; }
+  $("testEmail").disabled = !s.email_ready || !s.alert_emails.length;
+
+  const base = location.origin;
+  const own = state.companies.filter((c) => !c.is_default);
+  renderStarter(state.companies.filter((c) => c.is_default));
+  $("companies").innerHTML = own.length ? own.map((c) => {
+    const busy = state.checking.includes(c.id);
+    return `<div class="company">
+      <div class="company-top"><span class="company-name">${esc(c.name)}</span><span class="tag">${esc(c.source)}</span></div>
+      <div class="company-meta">${busy ? "Checking now…" : `Checked ${ago(c.last_checked_at)}`}.
+        ${c.open_jobs || 0} open, ${c.eligible_jobs || 0} eligible${hiddenNote(c)}
+        ${c.last_error ? `<br><span class="err">${esc(c.last_error)}</span>` : ""}</div>
+      <div class="company-actions">
+        <button class="btn small" data-check="${c.id}" ${busy ? "disabled" : ""}>Check now</button>
+        <a class="btn small" href="${esc(c.url)}" target="_blank" rel="noopener" style="text-decoration:none">Careers page</a>
+        <button class="btn small" data-remove="${c.id}">Stop watching</button>
+      </div>
+      ${c.recipe?.steps?.length ? `<details class="hook"><summary>How the jobs were found</summary>
+        <ol class="steps">${c.recipe.steps.map((x) => `<li>${esc(x)}</li>`).join("")}</ol></details>` : ""}
+      <details class="hook"><summary>Trigger a check from another tool</summary>
+        Send a POST request to this link:<code>${esc(base)}/webhook/check/${c.id}</code>
+        <button class="btn small" data-copy="${esc(base)}/webhook/check/${c.id}">Copy link</button>
+      </details>
+    </div>`;
+  }).join("") : `<p class="hint">Companies you add show up here. The starter list below is already being watched.</p>`;
+
+  $("tabs").innerHTML = TABS.map(([key, label]) => {
+    const n = key ? (state.counts[key] || 0) : (state.counts.all || 0);
+    return `<button class="tab" role="tab" aria-selected="${tab === key}" data-tab="${key}">${label}<span class="n">${n}</span></button>`;
+  }).join("");
+
+  $("events").innerHTML = state.events.map((e) =>
+    `<li class="${esc(e.level)}"><time>${ago(e.ts)}</time> ${esc(e.message)}</li>`).join("");
+}
+
+// Why a company with jobs can show "0 open": say what was found and hidden.
+function hiddenNote(c) {
+  const bits = [];
+  if (c.away_jobs) bits.push(`${c.away_jobs} outside your area`);
+  if (c.other_level_jobs) bits.push(`${c.other_level_jobs} not your level`);
+  return bits.length ? ` (hidden: ${bits.join(", ")})` : "";
+}
+
+const openGroups = new Set();
+function renderStarter(list) {
+  const active = list.filter((c) => c.active).length;
+  const snapDate = list.find((c) => c.snapshot)?.snapshot?.date;
+  $("starterSum").innerHTML = list.length
+    ? `Watching ${active} of ${list.length} companies that were hiring in India${snapDate ? ` on ${new Date(snapDate).toLocaleDateString(undefined, { day: "numeric", month: "short" })}` : ""}. Jobs from the last 10 days are scored on the first check. Later checks only score newly posted jobs.`
+    : `The starter list is empty. <button class="linkbtn" data-restore>Add the starter list</button>`;
+  const q = $("starterSearch").value.trim().toLowerCase();
+  const groups = {};
+  list.filter((c) => !q || c.name.toLowerCase().includes(q)).forEach((c) => (groups[c.category] ||= []).push(c));
+  $("starter").innerHTML = Object.entries(groups).map(([cat, cs]) => {
+    const on = cs.filter((c) => c.active).length;
+    const open = q || openGroups.has(cat);
+    return `<details class="group" data-group="${esc(cat)}" ${open ? "open" : ""}>
+      <summary><span class="group-title">${esc(cat)}</span><span class="group-count">${on} of ${cs.length} on</span>
+        <button class="btn small" data-cat="${esc(cat)}" data-cat-on="${on ? 0 : 1}">${on ? "Pause all" : "Resume all"}</button></summary>
+      ${cs.map((c) => {
+        const busy = state.checking.includes(c.id);
+        const snap = c.snapshot;
+        const meta = c.last_checked_at
+          ? `${busy ? "Checking now" : `Checked ${ago(c.last_checked_at)}`}. ${c.open_jobs || 0} open in your area${c.eligible_jobs ? `, ${c.eligible_jobs} eligible` : ""}${hiddenNote(c)}`
+          : snap ? `${snap.india_jobs} India openings, ${snap.entry_level_india_jobs} entry-level${snap.top_cities?.length ? ` (${snap.top_cities.join(", ")})` : ""}` : "Not checked yet";
+        return `<div class="sc ${c.active ? "" : "paused"}">
+          <input type="checkbox" ${c.active ? "checked" : ""} data-toggle="${c.id}" aria-label="Watch ${esc(c.name)}">
+          <span class="sc-name">${esc(c.name)} <span class="tag">${esc(c.source)}</span></span>
+          <span class="sc-meta">${meta}${c.last_error ? `<br><span class="err">${esc(c.last_error)}</span>` : ""}</span>
+          <span class="sc-actions">
+            ${c.active ? `<button class="linkbtn" data-check="${c.id}" ${busy ? "disabled" : ""}>Check now</button>` : ""}
+            ${c.skipped_jobs ? `<button class="linkbtn" data-score="${c.id}">Score current openings (${c.skipped_jobs})</button>` : ""}
+            <a href="${esc(c.url)}" target="_blank" rel="noopener">Careers page</a>
+          </span>
+        </div>`;
+      }).join("")}
+    </details>`;
+  }).join("") || (list.length ? `<p class="hint">No company matches "${esc(q)}".</p>` : "");
+}
+
+async function renderJobs() {
+  const list = await api(`/api/jobs?verdict=${encodeURIComponent(tab)}&level=${encodeURIComponent(level)}`);
+  if (!list.length) {
+    const msg = {
+      eligible: ["No eligible jobs yet", level === "experienced" && state.profile.career_stage === "fresher"
+        ? "You're on a fresher profile, so experienced roles aren't marked eligible. They still show under Related and All."
+        : level === "fresher" && state.profile.career_stage !== "fresher"
+        ? "You're on an experienced profile, so fresher roles and internships aren't marked eligible."
+        : "When a company posts a job that fits your resume, it shows up here and you get an email."],
+      related: ["No related jobs", "Jobs in your field that you don't fully qualify for appear here."],
+      pending: ["Everything is scored", "New jobs wait here until Kev scores them."],
+      "": ["No open jobs", "Add a company's careers page to start."],
+    }[tab];
+    $("jobs").innerHTML = `<div class="empty"><strong>${msg[0]}</strong>${msg[1]}</div>`;
+    return;
+  }
+  $("jobs").innerHTML = list.map((j) => {
+    const fresh = !j.is_baseline && (Date.now() - new Date(j.first_seen_at).getTime()) < 48 * 3600e3;
+    const reasons = (j.reasons || []).map((r) => `<li>${esc(r)}</li>`).join("");
+    return `<div class="job ${openJob === j.id ? "open" : ""}" data-job="${j.id}">
+      <div>
+        <a class="job-title" href="${esc(j.url)}" target="_blank" rel="noopener">${esc(j.title)}</a>
+        ${fresh ? `<span class="new">New</span>` : ""}
+        <div class="job-sub">${esc(j.company)}${j.location ? `, ${esc(j.location)}` : ""}${j.job_level ? `<span class="lvl">${LEVEL_LABEL[j.job_level] || esc(j.job_level)}</span>` : ""}</div>
+      </div>
+      <div class="job-right">${meter(j.fit_score, j.verdict)}
+        <span class="verdict v-${esc(j.verdict)}">${VERDICT_LABEL[j.verdict] || esc(j.verdict)}</span></div>
+      <div class="job-detail">
+        ${reasons ? `<ul>${reasons}</ul>` : ""}
+        <a class="apply" href="${esc(j.url)}" target="_blank" rel="noopener">Open the job posting</a>
+        <div class="meta">Found ${ago(j.first_seen_at)}${j.is_baseline ? " (was already listed when you added this company)" : ""}.
+          ${j.evaluated_at ? `Scored ${ago(j.evaluated_at)} by ${esc(j.model || "Kev")}.` : ""}
+          ${j.emailed_at ? `Emailed ${ago(j.emailed_at)}.` : ""}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+let timer;
+async function refresh() {
+  clearTimeout(timer);
+  if (document.body.classList.contains("locked")) return;
+  try {
+    if (level === null) {
+      const first = await api("/api/state");
+      level = first.profile.career_stage === "fresher" ? "fresher" : "experienced";
+    }
+    state = await api(`/api/state?level=${encodeURIComponent(level)}`);
+    renderState();
+    await renderJobs();
+  } catch (e) {
+    if (document.body.classList.contains("locked")) return;
+    $("status").textContent = `Can't reach the TheWatcher server. ${e.message}`;
+  }
+  timer = setTimeout(refresh, state?.checking?.length ? 4000 : 30000);
+}
+
+// --- events -----------------------------------------------------------------
+document.addEventListener("click", async (ev) => {
+  const t = ev.target.closest("[data-level],[data-tab],[data-check],[data-remove],[data-copy],[data-job],[data-cat],[data-score],[data-restore],[data-review],[data-rm-work]");
+  if (!t) return;
+  if (t.dataset.review !== undefined) { openProfile(); return; }
+  if (t.dataset.rmWork !== undefined) { t.closest(".wh").remove(); autoYears(); return; }
+  if (t.dataset.cat !== undefined) {
+    ev.preventDefault();
+    const on = t.dataset.catOn === "1";
+    await api("/api/categories/active", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ category: t.dataset.cat, active: on }) });
+    toast(on ? "Resumed" : "Paused"); refresh(); return;
+  }
+  if (t.dataset.score) {
+    const r = await api(`/api/companies/${t.dataset.score}/score-current`, { method: "POST" });
+    toast(`Scoring ${r.queued} current openings`); setTimeout(refresh, 600); return;
+  }
+  if (t.dataset.restore !== undefined) {
+    const r = await api("/api/defaults/restore", { method: "POST" });
+    toast(`Added ${r.added} companies`); setTimeout(refresh, 600); return;
+  }
+  if (t.dataset.level !== undefined) { level = t.dataset.level; refresh(); return; }
+  if (t.dataset.tab !== undefined) { tab = t.dataset.tab; refresh(); return; }
+  if (t.dataset.check) { await api(`/api/companies/${t.dataset.check}/check`, { method: "POST" }); toast("Checking now"); setTimeout(refresh, 600); return; }
+  if (t.dataset.remove) {
+    if (!confirm("Stop watching this company? Its saved jobs will be removed.")) return;
+    await api(`/api/companies/${t.dataset.remove}`, { method: "DELETE" }); toast("Stopped watching"); refresh(); return;
+  }
+  if (t.dataset.copy) { await navigator.clipboard.writeText(t.dataset.copy); toast("Link copied"); return; }
+  if (t.dataset.job && !ev.target.closest("a")) {
+    const id = Number(t.dataset.job); openJob = openJob === id ? null : id;
+    t.classList.toggle("open", openJob === id);
+    document.querySelectorAll(".job.open").forEach((el) => { if (Number(el.dataset.job) !== openJob) el.classList.remove("open"); });
+  }
+});
+
+document.addEventListener("change", async (ev) => {
+  const id = ev.target.dataset?.toggle;
+  if (!id) return;
+  await api(`/api/companies/${id}/active`, { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ active: ev.target.checked }) });
+  toast(ev.target.checked ? "Watching again" : "Paused"); refresh();
+});
+document.addEventListener("toggle", (ev) => {
+  const g = ev.target.dataset?.group;
+  if (g === undefined || $("starterSearch").value.trim()) return;
+  ev.target.open ? openGroups.add(g) : openGroups.delete(g);
+}, true);
+$("starterSearch").addEventListener("input", () => state && renderStarter(state.companies.filter((c) => c.is_default)));
+
+$("checkAll").onclick = async () => { await api("/api/check-all", { method: "POST" }); toast("Checking all companies"); setTimeout(refresh, 600); };
+
+$("addForm").onsubmit = async (ev) => {
+  ev.preventDefault();
+  try {
+    await api("/api/companies", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: $("cName").value, url: $("cUrl").value }) });
+    $("cName").value = ""; $("cUrl").value = "";
+    toast("Now watching. The first check runs right away.");
+    setTimeout(refresh, 600);
+  } catch (e) { toast(e.message); }
+};
+
+$("savePrefs").onclick = async () => {
+  try {
+    await api("/api/preferences", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ locations: $("locations").value, include_internships: $("internships").checked,
+                             india_only: $("indiaOnly").checked }) });
+    toast("Preferences saved. Re-scoring open jobs."); setTimeout(refresh, 600);
+  } catch (e) { toast(e.message); }
+};
+
+// --- profile review ---------------------------------------------------------
+function monthsOf(v) { if (!v) return null; const [y, m] = v.split("-").map(Number); return y * 12 + m; }
+function yearsFrom(rows) {
+  // Same rule as the server: full-time jobs only, overlapping months counted once.
+  const now = new Date(), nowM = now.getFullYear() * 12 + now.getMonth() + 1;
+  const spans = rows.filter((r) => !r.internship && r.start)
+    .map((r) => [monthsOf(r.start), r.end === "present" ? nowM : monthsOf(r.end)])
+    .filter(([s, e]) => s && e && e >= s).sort((a, b) => a[0] - b[0]);
+  let total = 0, cur = null;
+  for (const [s, e0] of spans) {
+    const e = e0 + 1;
+    if (cur && s <= cur[1]) { cur[1] = Math.max(cur[1], e); continue; }
+    if (cur) total += cur[1] - cur[0];
+    cur = [s, e];
+  }
+  if (cur) total += cur[1] - cur[0];
+  return Math.round(total / 12 * 10) / 10;
+}
+const validMonth = (v) => (/^\d{4}-(0[1-9]|1[0-2])$/.test(v || "") ? v : "");
+
+function workRow(w = {}) {
+  const div = document.createElement("div");
+  div.className = "wh";
+  const current = w.end === "present";
+  div.innerHTML = `
+    <div><label>Title</label><input type="text" data-f="title" maxlength="120" value="${esc(w.title)}"></div>
+    <div><label>Company</label><input type="text" data-f="company" maxlength="120" value="${esc(w.company)}"></div>
+    <div><label>From</label><input type="month" data-f="start" value="${validMonth(w.start)}"></div>
+    <div><label>To</label><input type="month" data-f="end" value="${current ? "" : validMonth(w.end)}" ${current ? "disabled" : ""}></div>
+    <button type="button" class="btn small rm" data-rm-work aria-label="Remove this job">Remove</button>
+    <div class="opts">
+      <label><input type="checkbox" data-f="current" ${current ? "checked" : ""}> I work here now</label>
+      <label><input type="checkbox" data-f="internship" ${w.internship ? "checked" : ""}> Internship</label>
+    </div>`;
+  return div;
+}
+function readRows() {
+  return [...document.querySelectorAll("#whRows .wh")].map((d) => {
+    const f = (name) => d.querySelector(`[data-f=${name}]`);
+    return { title: f("title").value.trim(), company: f("company").value.trim(), start: f("start").value || null,
+             end: f("current").checked ? "present" : (f("end").value || null), internship: f("internship").checked };
+  });
+}
+function autoYears() {
+  if ($("pYears").dataset.manual === "1") return;
+  const rows = readRows();
+  $("pYears").value = rows.some((r) => r.start) ? yearsFrom(rows) : "";
+}
+
+async function openProfile() {
+  let data;
+  try { data = await api("/api/profile"); } catch (e) { toast(e.message); return; }
+  const f = data.form;
+  $("dlgIntro").textContent = data.needs_review
+    ? (data.read_by_gemini
+      ? `Gemini read these details from ${data.resume_file}. Check each one and fix anything that's wrong, then save.`
+      : "Gemini isn't set up or couldn't read this file, so fill in your details yourself, then save.")
+    : "These are the details jobs are compared against. Change anything, then save.";
+  (f.career_stage === "fresher" ? $("pFresher") : $("pExp")).checked = true;
+  $("pDegree").value = f.degree || "";
+  $("pGrad").value = f.graduation_year ?? "";
+  $("pCgpa").value = f.cgpa ?? "";
+  $("pScale").value = String(f.cgpa_scale === 4 ? 4 : 10);
+  $("pPct").value = f.percentage ?? "";
+  $("pRole").value = f.current_role || "";
+  $("pYears").value = f.years_experience ?? "";
+  $("pYears").dataset.manual = "0";
+  $("whRows").replaceChildren(...(f.work_history || []).map(workRow));
+  $("pSkills").value = (f.skills || []).join(", ");
+  $("pProjects").value = (f.projects || []).join("\n");
+  $("pCourses").value = (f.coursework || []).join(", ");
+  const mine = new Set(f.fields || []);
+  $("pFields").innerHTML = Object.entries(data.field_options || {}).map(([k, label]) =>
+    `<label><input type="checkbox" value="${esc(k)}" ${mine.has(k) ? "checked" : ""}> ${esc(label)}</label>`).join("");
+  $("pBased").value = (f.based_in || []).join(", ");
+  if (!$("profileDlg").open) $("profileDlg").showModal();
+}
+
+$("editProfile").onclick = () => openProfile();
+$("dlgLater").onclick = () => $("profileDlg").close();
+$("addWork").onclick = () => { $("whRows").append(workRow()); $("whRows").lastElementChild.querySelector("input").focus(); };
+$("pYears").addEventListener("input", () => { $("pYears").dataset.manual = "1"; });
+$("whRows").addEventListener("input", autoYears);
+$("whRows").addEventListener("change", (ev) => {
+  if (ev.target.dataset.f === "current") {
+    const end = ev.target.closest(".wh").querySelector("[data-f=end]");
+    end.disabled = ev.target.checked; if (ev.target.checked) end.value = "";
+  }
+  autoYears();
+});
+
+$("profileForm").onsubmit = async (ev) => {
+  ev.preventDefault();
+  const num = (id) => ($(id).value === "" ? null : Number($(id).value));
+  const list = (id) => $(id).value.split(",").map((x) => x.trim()).filter(Boolean);
+  const body = {
+    career_stage: document.querySelector("input[name=pstage]:checked").value,
+    degree: $("pDegree").value, graduation_year: num("pGrad"),
+    cgpa: num("pCgpa"), cgpa_scale: num("pCgpa") == null ? null : Number($("pScale").value),
+    percentage: num("pPct"), current_role: $("pRole").value, years_experience: num("pYears"),
+    work_history: readRows(), skills: list("pSkills"), based_in: list("pBased"),
+    projects: $("pProjects").value.split("\n").map((x) => x.trim()).filter(Boolean), coursework: list("pCourses"),
+    fields: [...document.querySelectorAll("#pFields input:checked")].map((x) => x.value),
+  };
+  $("dlgSave").disabled = true;
+  try {
+    await api("/api/profile", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    $("profileDlg").close();
+    level = body.career_stage;
+    toast("Profile saved. Re-scoring open jobs."); setTimeout(refresh, 600);
+  } catch (e) { toast(e.message); }
+  $("dlgSave").disabled = false;
+};
+
+$("saveEmails").onclick = async () => {
+  const emails = $("alertEmails").value.split(/[,;\s]+/).map((x) => x.trim()).filter(Boolean);
+  try {
+    const r = await api("/api/alert-emails", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ emails }) });
+    $("alertEmails").value = r.emails.join(", ");
+    toast(r.emails.length ? `Alerts will go to ${r.emails.join(", ")}` : "Addresses cleared");
+    refresh();
+  } catch (e) { toast(e.message); }
+};
+
+$("testEmail").onclick = async () => {
+  try { await api("/api/test-email", { method: "POST" }); toast(`Test email sent to ${state.settings.alert_email}`); }
+  catch (e) { toast(e.message); }
+};
+
+async function uploadResume(file) {
+  if (!file) return;
+  const fd = new FormData(); fd.append("file", file);
+  $("drop").textContent = "Reading your resume… (Gemini can take a few seconds)";
+  try {
+    await api("/api/resume", { method: "POST", body: fd });
+    toast("Resume read. Check the details, then save.");
+    reviewShown = true;
+    openProfile();
+  }
+  catch (e) { toast(e.message); }
+  $("drop").textContent = "Drop a PDF or DOCX here, or click to choose";
+  refresh();
+}
+const drop = $("drop");
+drop.onclick = () => $("resumeFile").click();
+drop.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("resumeFile").click(); } };
+$("resumeFile").onchange = (e) => uploadResume(e.target.files[0]);
+drop.ondragover = (e) => { e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove("over"); uploadResume(e.dataTransfer.files[0]); };
+
+// --- sign in ----------------------------------------------------------------
+let authMode = "login", signupOpen = true, resetToken = null;
+const AUTH_MODES = {
+  login: { intro: "Welcome back. Log in to see your dashboard.", button: "Log in" },
+  signup: { intro: "Your account gets its own resume, companies, jobs and alerts. Nobody else sees them.", button: "Create account" },
+  forgot: { title: "Forgot your password?", intro: "Enter your username. We'll email a one-time link to set a new password to the account's email.", button: "Email me a reset link" },
+  reset: { title: "Set a new password", intro: "Choose a new password of at least 8 characters. You'll be signed in right after.", button: "Set new password" },
+};
+function setAuthMode(mode) {
+  if (mode === "signup" && !signupOpen) return;
+  authMode = mode;
+  const m = AUTH_MODES[mode];
+  const tabs = mode === "login" || mode === "signup";
+  $("authForm").dataset.mode = mode;
+  document.querySelector(".auth-tabs").hidden = !tabs;
+  $("authTitle").hidden = tabs; $("authTitle").textContent = m.title || "";
+  $("tabLogin").setAttribute("aria-selected", String(mode === "login"));
+  $("tabSignup").setAttribute("aria-selected", String(mode === "signup"));
+  document.querySelectorAll("#authForm [data-show]").forEach((el) => { el.hidden = !el.dataset.show.split(" ").includes(mode); });
+  $("authIntro").textContent = m.intro;
+  $("authBtn").textContent = m.button;
+  $("authBtn").hidden = false;
+  $("aPassLabel").textContent = mode === "reset" ? "New password" : "Password";
+  const fresh = mode === "signup" || mode === "reset";
+  $("aPass").autocomplete = fresh ? "new-password" : "current-password";
+  $("aPass").placeholder = fresh ? "at least 8 characters" : "";
+  $("authSwitch").innerHTML = mode === "forgot" || mode === "reset"
+    ? `<button type="button" class="linkbtn" data-auth-mode="login">Back to log in</button>`
+    : !signupOpen ? "New accounts are turned off here."
+    : mode === "signup" ? `Already have an account? <button type="button" class="linkbtn" data-auth-mode="login">Log in</button>`
+    : `New here? <button type="button" class="linkbtn" data-auth-mode="signup">Create an account</button>`;
+  $("authErr").textContent = ""; $("authOk").hidden = true;
+  $("aPass").value = ""; $("aPass2").value = "";
+  (mode === "reset" ? $("aPass") : $("aUser").value && mode !== "forgot" ? $("aPass") : $("aUser")).focus();
+}
+function showAuth(mode) {
+  clearTimeout(timer);
+  document.body.classList.add("locked");
+  setAuthMode(mode || "login");
+}
+function unlock(username) {
+  document.body.classList.remove("locked");
+  $("who").textContent = `Signed in as ${username}`;
+  refresh();
+}
+document.addEventListener("click", (ev) => {
+  const b = ev.target.closest("[data-auth-mode]");
+  if (b) setAuthMode(b.dataset.authMode);
+});
+const postJSON = (path, body) => api(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+$("authForm").onsubmit = async (ev) => {
+  ev.preventDefault();
+  const mode = authMode, err = (m) => { $("authErr").textContent = m; };
+  err("");
+  if (mode !== "forgot" && mode !== "reset" && !$("aUser").value.trim()) return err("Type your username.");
+  if (mode === "forgot" && !$("aUser").value.trim()) return err("Type your username.");
+  if (mode !== "forgot" && !$("aPass").value) return err("Type a password.");
+  if ((mode === "signup" || mode === "reset") && $("aPass").value.length < 8) return err("Use at least 8 characters for the password.");
+  if ((mode === "signup" || mode === "reset") && $("aPass").value !== $("aPass2").value) return err("The two passwords don't match.");
+  $("authBtn").disabled = true;
+  try {
+    if (mode === "forgot") {
+      const r = await postJSON("/api/auth/forgot", { username: $("aUser").value });
+      $("authOk").textContent = r.message; $("authOk").hidden = false; $("authBtn").hidden = true;
+    } else if (mode === "reset") {
+      const r = await postJSON("/api/auth/reset", { token: resetToken, new_password: $("aPass").value });
+      resetToken = null; history.replaceState(null, "", location.pathname + location.search);
+      $("aPass").value = ""; $("aPass2").value = "";
+      unlock(r.username); toast("Password changed. You're signed in.");
+    } else {
+      const body = { username: $("aUser").value, password: $("aPass").value };
+      if (mode === "signup") body.email = $("aEmail").value;
+      const r = await postJSON(mode === "signup" ? "/api/auth/signup" : "/api/auth/login", body);
+      $("aPass").value = ""; $("aPass2").value = ""; $("aEmail").value = "";
+      unlock(r.username);
+      if (mode === "signup") toast("Account created. Start by uploading your resume.");
+    }
+  } catch (e) { err(e.message); }
+  $("authBtn").disabled = false;
+};
+$("logout").onclick = async () => {
+  await fetch("/api/auth/logout", { method: "POST" });
+  level = null; state = null; prefsLoaded = false; emailsLoaded = false; reviewShown = false;
+  tab = "eligible"; openJob = null; $("who").textContent = "";
+  showAuth("login");
+};
+$("changePw").onclick = () => {
+  $("pwForm").reset(); $("pwErr").textContent = ""; $("acctErr").textContent = "";
+  $("acctEmail").value = state?.settings?.account_email || "";
+  const reset = state?.settings?.reset_email;
+  $("acctEmailHint").textContent = (reset && !state.settings.account_email
+    ? `Until you add one, a password-reset link goes to ${reset}. `
+    : "A password-reset link goes here if you forget your password. ")
+    + "Job alerts go to the addresses under Email alerts.";
+  $("acctDlg").showModal();
+};
+$("pwCancel").onclick = () => $("acctDlg").close();
+$("acctEmailForm").onsubmit = async (ev) => {
+  ev.preventDefault();
+  try {
+    const r = await postJSON("/api/account/email", { email: $("acctEmail").value });
+    $("acctEmail").value = r.email || ""; toast(r.email ? `Account email saved: ${r.email}` : "Account email removed");
+    refresh();
+  } catch (e) { $("acctErr").textContent = e.message; }
+};
+$("pwForm").onsubmit = async (ev) => {
+  ev.preventDefault();
+  if ($("pwNew").value !== $("pwNew2").value) { $("pwErr").textContent = "The new passwords don't match."; return; }
+  try {
+    await api("/api/account/password", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ current_password: $("pwCur").value, new_password: $("pwNew").value }) });
+    $("acctDlg").close(); toast("Password changed");
+  } catch (e) { $("pwErr").textContent = e.message; }
+};
+
+async function boot() {
+  const m = location.hash.match(/^#reset=([A-Za-z0-9_-]+)$/);  // link from a password-reset email
+  if (m) resetToken = m[1];
+  try {
+    const s = await api("/api/auth/status");
+    signupOpen = s.signup_open;
+    $("tabSignup").disabled = !signupOpen;
+    if (resetToken) showAuth("reset");
+    else s.logged_in ? unlock(s.username) : showAuth(s.has_users || !signupOpen ? "login" : "signup");
+  } catch (e) {
+    document.body.classList.remove("locked");
+    $("status").textContent = `Can't reach the TheWatcher server. ${e.message}`;
+  }
+}
+boot();
+</script>
+</body>
+</html>

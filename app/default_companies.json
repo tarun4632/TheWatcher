@@ -1,0 +1,1276 @@
+{
+ "snapshot_date": "2026-09-25",
+ "source": "Derived from the job-board-aggregator dataset by Riley Dorrington (github.com/Feashliaa/job-board-aggregator), CC BY-NC 4.0. Personal, non-commercial use.",
+ "companies": [
+  {
+   "name": "Razorpay",
+   "category": "India-based companies and startups",
+   "source": "greenhouse",
+   "source_key": "razorpaysoftwareprivatelimited",
+   "url": "https://job-boards.greenhouse.io/razorpaysoftwareprivatelimited",
+   "india_jobs": 57,
+   "entry_level_india_jobs": 7,
+   "top_cities": [
+    "bengaluru",
+    "mumbai",
+    "chennai"
+   ]
+  },
+  {
+   "name": "PhonePe",
+   "category": "India-based companies and startups",
+   "source": "greenhouse",
+   "source_key": "phonepe",
+   "url": "https://job-boards.greenhouse.io/phonepe",
+   "india_jobs": 55,
+   "entry_level_india_jobs": 0,
+   "top_cities": [
+    "bengaluru",
+    "pune",
+    "noida"
+   ]
+  },
+  {
+   "name": "InMobi",
+   "category": "India-based companies and startups",
+   "source": "greenhouse",
+   "source_key": "inmobi",
+   "url": "https://job-boards.greenhouse.io/inmobi",
+   "india_jobs": 66,
+   "entry_level_india_jobs": 1,
+   "top_cities": [
+    "bengaluru",
+    "delhi",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Glance",
+   "category": "India-based companies and startups",
+   "source": "greenhouse",
+   "source_key": "glance",
+   "url": "https://job-boards.greenhouse.io/glance",
+   "india_jobs": 36,
+   "entry_level_india_jobs": 1,
+   "top_cities": [
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "DevRev",
+   "category": "India-based companies and startups",
+   "source": "greenhouse",
+   "source_key": "devrev",
+   "url": "https://job-boards.greenhouse.io/devrev",
+   "india_jobs": 35,
+   "entry_level_india_jobs": 0,
+   "top_cities": [
+    "bengaluru",
+    "remote",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Zenoti",
+   "category": "India-based companies and startups",
+   "source": "greenhouse",
+   "source_key": "zenoti",
+   "url": "https://job-boards.greenhouse.io/zenoti",
+   "india_jobs": 31,
+   "entry_level_india_jobs": 1,
+   "top_cities": [
+    "hyderabad"
+   ]
+  },
+  {
+   "name": "Sigmoid",
+   "category": "India-based companies and startups",
+   "source": "greenhouse",
+   "source_key": "sigmoid",
+   "url": "https://job-boards.greenhouse.io/sigmoid",
+   "india_jobs": 42,
+   "entry_level_india_jobs": 3,
+   "top_cities": [
+    "bengaluru",
+    "hyderabad"
+   ]
+  },
+  {
+   "name": "Zinnov",
+   "category": "India-based companies and startups",
+   "source": "greenhouse",
+   "source_key": "zinnov",
+   "url": "https://job-boards.greenhouse.io/zinnov",
+   "india_jobs": 46,
+   "entry_level_india_jobs": 4,
+   "top_cities": [
+    "bengaluru",
+    "hyderabad",
+    "chennai"
+   ]
+  },
+  {
+   "name": "Graviton Research Capital",
+   "category": "India-based companies and startups",
+   "source": "greenhouse",
+   "source_key": "gravitonresearchcapital",
+   "url": "https://job-boards.greenhouse.io/gravitonresearchcapital",
+   "india_jobs": 36,
+   "entry_level_india_jobs": 4,
+   "top_cities": [
+    "gurugram"
+   ]
+  },
+  {
+   "name": "Gruve",
+   "category": "India-based companies and startups",
+   "source": "greenhouse",
+   "source_key": "gruve",
+   "url": "https://job-boards.greenhouse.io/gruve",
+   "india_jobs": 34,
+   "entry_level_india_jobs": 4,
+   "top_cities": [
+    "pune",
+    "mumbai",
+    "remote"
+   ]
+  },
+  {
+   "name": "Emergent Labs",
+   "category": "India-based companies and startups",
+   "source": "greenhouse",
+   "source_key": "emergentlabsinc",
+   "url": "https://job-boards.greenhouse.io/emergentlabsinc",
+   "india_jobs": 48,
+   "entry_level_india_jobs": 1,
+   "top_cities": [
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Paytm",
+   "category": "India-based companies and startups",
+   "source": "lever",
+   "source_key": "paytm",
+   "url": "https://jobs.lever.co/paytm",
+   "india_jobs": 280,
+   "entry_level_india_jobs": 36,
+   "top_cities": [
+    "noida",
+    "mumbai",
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Paytm Payments Services",
+   "category": "India-based companies and startups",
+   "source": "lever",
+   "source_key": "paytmpayments",
+   "url": "https://jobs.lever.co/paytmpayments",
+   "india_jobs": 484,
+   "entry_level_india_jobs": 53,
+   "top_cities": [
+    "noida",
+    "bengaluru",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Meesho",
+   "category": "India-based companies and startups",
+   "source": "lever",
+   "source_key": "meesho",
+   "url": "https://jobs.lever.co/meesho",
+   "india_jobs": 75,
+   "entry_level_india_jobs": 2,
+   "top_cities": [
+    "bengaluru",
+    "chennai",
+    "hyderabad"
+   ]
+  },
+  {
+   "name": "Hevo Data",
+   "category": "India-based companies and startups",
+   "source": "lever",
+   "source_key": "hevodata",
+   "url": "https://jobs.lever.co/hevodata",
+   "india_jobs": 52,
+   "entry_level_india_jobs": 6,
+   "top_cities": [
+    "bengaluru",
+    "pune"
+   ]
+  },
+  {
+   "name": "Mindtickle",
+   "category": "India-based companies and startups",
+   "source": "lever",
+   "source_key": "mindtickle",
+   "url": "https://jobs.lever.co/mindtickle",
+   "india_jobs": 23,
+   "entry_level_india_jobs": 0,
+   "top_cities": [
+    "pune",
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Zeta",
+   "category": "India-based companies and startups",
+   "source": "lever",
+   "source_key": "zeta",
+   "url": "https://jobs.lever.co/zeta",
+   "india_jobs": 29,
+   "entry_level_india_jobs": 4,
+   "top_cities": [
+    "bengaluru",
+    "hyderabad",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Drivetrain",
+   "category": "India-based companies and startups",
+   "source": "lever",
+   "source_key": "drivetrain",
+   "url": "https://jobs.lever.co/drivetrain",
+   "india_jobs": 23,
+   "entry_level_india_jobs": 4,
+   "top_cities": []
+  },
+  {
+   "name": "Dozee",
+   "category": "India-based companies and startups",
+   "source": "lever",
+   "source_key": "dozee",
+   "url": "https://jobs.lever.co/dozee",
+   "india_jobs": 30,
+   "entry_level_india_jobs": 7,
+   "top_cities": [
+    "bengaluru",
+    "mumbai",
+    "chennai"
+   ]
+  },
+  {
+   "name": "Acceldata",
+   "category": "India-based companies and startups",
+   "source": "lever",
+   "source_key": "acceldata",
+   "url": "https://jobs.lever.co/acceldata",
+   "india_jobs": 22,
+   "entry_level_india_jobs": 1,
+   "top_cities": [
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "FamPay",
+   "category": "India-based companies and startups",
+   "source": "lever",
+   "source_key": "fampay",
+   "url": "https://jobs.lever.co/fampay",
+   "india_jobs": 18,
+   "entry_level_india_jobs": 4,
+   "top_cities": [
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Fi (epiFi)",
+   "category": "India-based companies and startups",
+   "source": "lever",
+   "source_key": "epifi",
+   "url": "https://jobs.lever.co/epifi",
+   "india_jobs": 11,
+   "entry_level_india_jobs": 5,
+   "top_cities": [
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "CRED",
+   "category": "India-based companies and startups",
+   "source": "lever",
+   "source_key": "cred",
+   "url": "https://jobs.lever.co/cred",
+   "india_jobs": 15,
+   "entry_level_india_jobs": 0,
+   "top_cities": [
+    "bengaluru",
+    "hyderabad",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Netomi",
+   "category": "India-based companies and startups",
+   "source": "lever",
+   "source_key": "netomi",
+   "url": "https://jobs.lever.co/netomi",
+   "india_jobs": 20,
+   "entry_level_india_jobs": 4,
+   "top_cities": [
+    "remote",
+    "gurugram"
+   ]
+  },
+  {
+   "name": "Nium",
+   "category": "India-based companies and startups",
+   "source": "lever",
+   "source_key": "nium",
+   "url": "https://jobs.lever.co/nium",
+   "india_jobs": 22,
+   "entry_level_india_jobs": 1,
+   "top_cities": [
+    "mumbai",
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Mactores",
+   "category": "India-based companies and startups",
+   "source": "lever",
+   "source_key": "mactores",
+   "url": "https://jobs.lever.co/mactores",
+   "india_jobs": 35,
+   "entry_level_india_jobs": 10,
+   "top_cities": [
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Beghou Consulting",
+   "category": "India-based companies and startups",
+   "source": "lever",
+   "source_key": "beghouconsulting",
+   "url": "https://jobs.lever.co/beghouconsulting",
+   "india_jobs": 63,
+   "entry_level_india_jobs": 16,
+   "top_cities": [
+    "pune",
+    "bengaluru",
+    "hyderabad"
+   ]
+  },
+  {
+   "name": "Atlan",
+   "category": "India-based companies and startups",
+   "source": "ashby",
+   "source_key": "atlan",
+   "url": "https://jobs.ashbyhq.com/atlan",
+   "india_jobs": 6,
+   "entry_level_india_jobs": 1,
+   "top_cities": []
+  },
+  {
+   "name": "Plane",
+   "category": "India-based companies and startups",
+   "source": "ashby",
+   "source_key": "plane",
+   "url": "https://jobs.ashbyhq.com/plane",
+   "india_jobs": 10,
+   "entry_level_india_jobs": 0,
+   "top_cities": []
+  },
+  {
+   "name": "SigNoz",
+   "category": "India-based companies and startups",
+   "source": "ashby",
+   "source_key": "signoz",
+   "url": "https://jobs.ashbyhq.com/signoz",
+   "india_jobs": 17,
+   "entry_level_india_jobs": 0,
+   "top_cities": []
+  },
+  {
+   "name": "Bureau",
+   "category": "India-based companies and startups",
+   "source": "ashby",
+   "source_key": "bureau",
+   "url": "https://jobs.ashbyhq.com/bureau",
+   "india_jobs": 18,
+   "entry_level_india_jobs": 2,
+   "top_cities": [
+    "bengaluru",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Almabase",
+   "category": "India-based companies and startups",
+   "source": "ashby",
+   "source_key": "almabase",
+   "url": "https://jobs.ashbyhq.com/almabase",
+   "india_jobs": 5,
+   "entry_level_india_jobs": 0,
+   "top_cities": [
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Composio",
+   "category": "India-based companies and startups",
+   "source": "ashby",
+   "source_key": "composio",
+   "url": "https://jobs.ashbyhq.com/composio",
+   "india_jobs": 4,
+   "entry_level_india_jobs": 1,
+   "top_cities": [
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Stripe",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "stripe",
+   "url": "https://job-boards.greenhouse.io/stripe",
+   "india_jobs": 65,
+   "entry_level_india_jobs": 18,
+   "top_cities": [
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "MongoDB",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "mongodb",
+   "url": "https://job-boards.greenhouse.io/mongodb",
+   "india_jobs": 103,
+   "entry_level_india_jobs": 13,
+   "top_cities": [
+    "gurugram",
+    "bengaluru",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Databricks",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "databricks",
+   "url": "https://job-boards.greenhouse.io/databricks",
+   "india_jobs": 108,
+   "entry_level_india_jobs": 1,
+   "top_cities": [
+    "bengaluru",
+    "remote",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Okta",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "okta",
+   "url": "https://job-boards.greenhouse.io/okta",
+   "india_jobs": 159,
+   "entry_level_india_jobs": 1,
+   "top_cities": [
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Zscaler",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "zscaler",
+   "url": "https://job-boards.greenhouse.io/zscaler",
+   "india_jobs": 119,
+   "entry_level_india_jobs": 3,
+   "top_cities": [
+    "bengaluru",
+    "mumbai",
+    "gurugram"
+   ]
+  },
+  {
+   "name": "Pure Storage",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "purestorage",
+   "url": "https://job-boards.greenhouse.io/purestorage",
+   "india_jobs": 132,
+   "entry_level_india_jobs": 2,
+   "top_cities": [
+    "bengaluru",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "GitLab",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "gitlab",
+   "url": "https://job-boards.greenhouse.io/gitlab",
+   "india_jobs": 54,
+   "entry_level_india_jobs": 0,
+   "top_cities": [
+    "bengaluru",
+    "remote"
+   ]
+  },
+  {
+   "name": "Rubrik",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "rubrik",
+   "url": "https://job-boards.greenhouse.io/rubrik",
+   "india_jobs": 51,
+   "entry_level_india_jobs": 4,
+   "top_cities": [
+    "bengaluru",
+    "mumbai",
+    "remote"
+   ]
+  },
+  {
+   "name": "Celonis",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "celonis",
+   "url": "https://job-boards.greenhouse.io/celonis",
+   "india_jobs": 42,
+   "entry_level_india_jobs": 5,
+   "top_cities": [
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "AlphaSense",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "alphasense",
+   "url": "https://job-boards.greenhouse.io/alphasense",
+   "india_jobs": 64,
+   "entry_level_india_jobs": 2,
+   "top_cities": [
+    "remote",
+    "pune",
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Anaplan",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "anaplan",
+   "url": "https://job-boards.greenhouse.io/anaplan",
+   "india_jobs": 56,
+   "entry_level_india_jobs": 3,
+   "top_cities": [
+    "gurugram",
+    "mumbai",
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Payoneer",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "payoneer",
+   "url": "https://job-boards.greenhouse.io/payoneer",
+   "india_jobs": 60,
+   "entry_level_india_jobs": 0,
+   "top_cities": [
+    "gurugram",
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Toast",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "toast",
+   "url": "https://job-boards.greenhouse.io/toast",
+   "india_jobs": 37,
+   "entry_level_india_jobs": 0,
+   "top_cities": [
+    "bengaluru",
+    "chennai"
+   ]
+  },
+  {
+   "name": "Commvault",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "commvault",
+   "url": "https://job-boards.greenhouse.io/commvault",
+   "india_jobs": 31,
+   "entry_level_india_jobs": 3,
+   "top_cities": [
+    "bengaluru",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Fivetran",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "fivetran",
+   "url": "https://job-boards.greenhouse.io/fivetran",
+   "india_jobs": 30,
+   "entry_level_india_jobs": 0,
+   "top_cities": [
+    "bengaluru",
+    "remote"
+   ]
+  },
+  {
+   "name": "Appian",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "appian",
+   "url": "https://job-boards.greenhouse.io/appian",
+   "india_jobs": 46,
+   "entry_level_india_jobs": 0,
+   "top_cities": [
+    "chennai"
+   ]
+  },
+  {
+   "name": "OneTrust",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "onetrust",
+   "url": "https://job-boards.greenhouse.io/onetrust",
+   "india_jobs": 48,
+   "entry_level_india_jobs": 0,
+   "top_cities": [
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Arcesium",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "arcesiumllc",
+   "url": "https://job-boards.greenhouse.io/arcesiumllc",
+   "india_jobs": 31,
+   "entry_level_india_jobs": 1,
+   "top_cities": [
+    "bengaluru",
+    "hyderabad",
+    "gurugram"
+   ]
+  },
+  {
+   "name": "Tide",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "tide",
+   "url": "https://job-boards.greenhouse.io/tide",
+   "india_jobs": 44,
+   "entry_level_india_jobs": 2,
+   "top_cities": [
+    "delhi",
+    "hyderabad",
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "PubMatic",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "pubmatic",
+   "url": "https://job-boards.greenhouse.io/pubmatic",
+   "india_jobs": 36,
+   "entry_level_india_jobs": 0,
+   "top_cities": [
+    "pune",
+    "gurugram",
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Cohere Health",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "coherehealth",
+   "url": "https://job-boards.greenhouse.io/coherehealth",
+   "india_jobs": 54,
+   "entry_level_india_jobs": 7,
+   "top_cities": [
+    "hyderabad"
+   ]
+  },
+  {
+   "name": "Ethos",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "ethoslife",
+   "url": "https://job-boards.greenhouse.io/ethoslife",
+   "india_jobs": 53,
+   "entry_level_india_jobs": 8,
+   "top_cities": [
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Instawork",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "instawork",
+   "url": "https://job-boards.greenhouse.io/instawork",
+   "india_jobs": 42,
+   "entry_level_india_jobs": 9,
+   "top_cities": [
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "GLG",
+   "category": "Global tech with India offices",
+   "source": "greenhouse",
+   "source_key": "gersonlehrmangroup",
+   "url": "https://job-boards.greenhouse.io/gersonlehrmangroup",
+   "india_jobs": 49,
+   "entry_level_india_jobs": 25,
+   "top_cities": [
+    "gurugram",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Veeva Systems",
+   "category": "Global tech with India offices",
+   "source": "lever",
+   "source_key": "veeva",
+   "url": "https://jobs.lever.co/veeva",
+   "india_jobs": 36,
+   "entry_level_india_jobs": 3,
+   "top_cities": [
+    "hyderabad",
+    "bengaluru",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Saviynt",
+   "category": "Global tech with India offices",
+   "source": "lever",
+   "source_key": "saviynt",
+   "url": "https://jobs.lever.co/saviynt",
+   "india_jobs": 43,
+   "entry_level_india_jobs": 2,
+   "top_cities": [
+    "bengaluru",
+    "delhi",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "JumpCloud",
+   "category": "Global tech with India offices",
+   "source": "lever",
+   "source_key": "jumpcloud",
+   "url": "https://jobs.lever.co/jumpcloud",
+   "india_jobs": 27,
+   "entry_level_india_jobs": 2,
+   "top_cities": [
+    "bengaluru",
+    "hyderabad",
+    "delhi"
+   ]
+  },
+  {
+   "name": "Sophos",
+   "category": "Global tech with India offices",
+   "source": "lever",
+   "source_key": "sophos",
+   "url": "https://jobs.lever.co/sophos",
+   "india_jobs": 23,
+   "entry_level_india_jobs": 0,
+   "top_cities": [
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Dun & Bradstreet",
+   "category": "Global tech with India offices",
+   "source": "lever",
+   "source_key": "dnb",
+   "url": "https://jobs.lever.co/dnb",
+   "india_jobs": 49,
+   "entry_level_india_jobs": 13,
+   "top_cities": [
+    "mumbai",
+    "hyderabad",
+    "delhi"
+   ]
+  },
+  {
+   "name": "AppZen",
+   "category": "Global tech with India offices",
+   "source": "lever",
+   "source_key": "appzen",
+   "url": "https://jobs.lever.co/appzen",
+   "india_jobs": 11,
+   "entry_level_india_jobs": 1,
+   "top_cities": [
+    "pune"
+   ]
+  },
+  {
+   "name": "Snowflake",
+   "category": "Global tech with India offices",
+   "source": "ashby",
+   "source_key": "snowflake",
+   "url": "https://jobs.ashbyhq.com/snowflake",
+   "india_jobs": 26,
+   "entry_level_india_jobs": 0,
+   "top_cities": [
+    "pune",
+    "bengaluru",
+    "delhi"
+   ]
+  },
+  {
+   "name": "OpenAI",
+   "category": "Global tech with India offices",
+   "source": "ashby",
+   "source_key": "openai",
+   "url": "https://jobs.ashbyhq.com/openai",
+   "india_jobs": 14,
+   "entry_level_india_jobs": 0,
+   "top_cities": [
+    "delhi",
+    "remote",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "UiPath",
+   "category": "Global tech with India offices",
+   "source": "ashby",
+   "source_key": "uipath",
+   "url": "https://jobs.ashbyhq.com/uipath",
+   "india_jobs": 15,
+   "entry_level_india_jobs": 1,
+   "top_cities": [
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Kong",
+   "category": "Global tech with India offices",
+   "source": "ashby",
+   "source_key": "kong",
+   "url": "https://jobs.ashbyhq.com/kong",
+   "india_jobs": 16,
+   "entry_level_india_jobs": 1,
+   "top_cities": [
+    "bengaluru",
+    "pune",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "G2",
+   "category": "Global tech with India offices",
+   "source": "ashby",
+   "source_key": "g2",
+   "url": "https://jobs.ashbyhq.com/g2",
+   "india_jobs": 22,
+   "entry_level_india_jobs": 1,
+   "top_cities": [
+    "bengaluru",
+    "gurugram"
+   ]
+  },
+  {
+   "name": "Airwallex",
+   "category": "Global tech with India offices",
+   "source": "ashby",
+   "source_key": "airwallex",
+   "url": "https://jobs.ashbyhq.com/airwallex",
+   "india_jobs": 12,
+   "entry_level_india_jobs": 1,
+   "top_cities": [
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Handshake",
+   "category": "Global tech with India offices",
+   "source": "ashby",
+   "source_key": "handshake",
+   "url": "https://jobs.ashbyhq.com/handshake",
+   "india_jobs": 11,
+   "entry_level_india_jobs": 2,
+   "top_cities": []
+  },
+  {
+   "name": "HackerOne",
+   "category": "Global tech with India offices",
+   "source": "ashby",
+   "source_key": "hackerone",
+   "url": "https://jobs.ashbyhq.com/hackerone",
+   "india_jobs": 4,
+   "entry_level_india_jobs": 1,
+   "top_cities": [
+    "pune"
+   ]
+  },
+  {
+   "name": "Johnson Controls",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "jci.wd5.myworkdayjobs.com|jci|jci",
+   "url": "https://jci.wd5.myworkdayjobs.com/jci",
+   "india_jobs": 544,
+   "entry_level_india_jobs": 161,
+   "top_cities": [
+    "pune",
+    "bengaluru",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Fiserv",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "fiserv.wd5.myworkdayjobs.com|fiserv|ext",
+   "url": "https://fiserv.wd5.myworkdayjobs.com/ext",
+   "india_jobs": 195,
+   "entry_level_india_jobs": 54,
+   "top_cities": [
+    "pune",
+    "bengaluru",
+    "noida"
+   ]
+  },
+  {
+   "name": "GE HealthCare",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "gehc.wd5.myworkdayjobs.com|gehc|gehc_externalsite",
+   "url": "https://gehc.wd5.myworkdayjobs.com/gehc_externalsite",
+   "india_jobs": 214,
+   "entry_level_india_jobs": 45,
+   "top_cities": [
+    "bengaluru",
+    "gurugram",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Ameriprise Financial",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "ameriprise.wd5.myworkdayjobs.com|ameriprise|ameriprise",
+   "url": "https://ameriprise.wd5.myworkdayjobs.com/ameriprise",
+   "india_jobs": 71,
+   "entry_level_india_jobs": 27,
+   "top_cities": [
+    "noida",
+    "gurugram",
+    "hyderabad"
+   ]
+  },
+  {
+   "name": "BlackRock",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "blackrock.wd1.myworkdayjobs.com|blackrock|blackrock_professional",
+   "url": "https://blackrock.wd1.myworkdayjobs.com/blackrock_professional",
+   "india_jobs": 59,
+   "entry_level_india_jobs": 32,
+   "top_cities": [
+    "mumbai",
+    "gurugram",
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Clearwater Analytics",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "clearwateranalytics.wd1.myworkdayjobs.com|clearwateranalytics|clearwater_analytics_careers",
+   "url": "https://clearwateranalytics.wd1.myworkdayjobs.com/clearwater_analytics_careers",
+   "india_jobs": 75,
+   "entry_level_india_jobs": 22,
+   "top_cities": [
+    "noida",
+    "mumbai",
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "KONE",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "kone.wd3.myworkdayjobs.com|kone|careers",
+   "url": "https://kone.wd3.myworkdayjobs.com/careers",
+   "india_jobs": 62,
+   "entry_level_india_jobs": 22,
+   "top_cities": [
+    "chennai",
+    "pune",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Unisys",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "unisys.wd5.myworkdayjobs.com|unisys|external",
+   "url": "https://unisys.wd5.myworkdayjobs.com/external",
+   "india_jobs": 81,
+   "entry_level_india_jobs": 20,
+   "top_cities": [
+    "bengaluru",
+    "hyderabad"
+   ]
+  },
+  {
+   "name": "Clarivate",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "clarivate.wd3.myworkdayjobs.com|clarivate|clarivate_careers",
+   "url": "https://clarivate.wd3.myworkdayjobs.com/clarivate_careers",
+   "india_jobs": 101,
+   "entry_level_india_jobs": 20,
+   "top_cities": [
+    "noida",
+    "bengaluru",
+    "chennai"
+   ]
+  },
+  {
+   "name": "Amgen",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "amgen.wd1.myworkdayjobs.com|amgen|careers",
+   "url": "https://amgen.wd1.myworkdayjobs.com/careers",
+   "india_jobs": 104,
+   "entry_level_india_jobs": 21,
+   "top_cities": [
+    "hyderabad"
+   ]
+  },
+  {
+   "name": "Wells Fargo",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "wf.wd1.myworkdayjobs.com|wf|wellsfargojobs",
+   "url": "https://wf.wd1.myworkdayjobs.com/wellsfargojobs",
+   "india_jobs": 129,
+   "entry_level_india_jobs": 24,
+   "top_cities": [
+    "bengaluru",
+    "hyderabad"
+   ]
+  },
+  {
+   "name": "NatWest Group",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "rbs.wd3.myworkdayjobs.com|rbs|rbs",
+   "url": "https://rbs.wd3.myworkdayjobs.com/rbs",
+   "india_jobs": 118,
+   "entry_level_india_jobs": 24,
+   "top_cities": [
+    "bengaluru",
+    "gurugram",
+    "chennai"
+   ]
+  },
+  {
+   "name": "Deutsche Bank",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "db.wd3.myworkdayjobs.com|db|dbwebsite",
+   "url": "https://db.wd3.myworkdayjobs.com/dbwebsite",
+   "india_jobs": 167,
+   "entry_level_india_jobs": 18,
+   "top_cities": [
+    "pune",
+    "mumbai",
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "DBS Bank",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "dbs.wd3.myworkdayjobs.com|dbs|dbs_careers",
+   "url": "https://dbs.wd3.myworkdayjobs.com/dbs_careers",
+   "india_jobs": 99,
+   "entry_level_india_jobs": 17,
+   "top_cities": [
+    "mumbai",
+    "bengaluru",
+    "delhi"
+   ]
+  },
+  {
+   "name": "Maersk",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "maersk.wd3.myworkdayjobs.com|maersk|maersk_careers",
+   "url": "https://maersk.wd3.myworkdayjobs.com/maersk_careers",
+   "india_jobs": 468,
+   "entry_level_india_jobs": 34,
+   "top_cities": [
+    "chennai",
+    "mumbai",
+    "pune"
+   ]
+  },
+  {
+   "name": "Thermo Fisher Scientific",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "thermofisher.wd5.myworkdayjobs.com|thermofisher|thermofishercareers",
+   "url": "https://thermofisher.wd5.myworkdayjobs.com/thermofishercareers",
+   "india_jobs": 409,
+   "entry_level_india_jobs": 24,
+   "top_cities": [
+    "bengaluru",
+    "hyderabad",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Flex",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "flextronics.wd1.myworkdayjobs.com|flextronics|careers",
+   "url": "https://flextronics.wd1.myworkdayjobs.com/careers",
+   "india_jobs": 96,
+   "entry_level_india_jobs": 20,
+   "top_cities": [
+    "chennai",
+    "pune",
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "HARMAN",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "harman.wd3.myworkdayjobs.com|harman|harman",
+   "url": "https://harman.wd3.myworkdayjobs.com/harman",
+   "india_jobs": 61,
+   "entry_level_india_jobs": 12,
+   "top_cities": [
+    "bengaluru",
+    "pune",
+    "gurugram"
+   ]
+  },
+  {
+   "name": "Mastercard",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "mastercard.wd1.myworkdayjobs.com|mastercard|corporatecareers",
+   "url": "https://mastercard.wd1.myworkdayjobs.com/corporatecareers",
+   "india_jobs": 118,
+   "entry_level_india_jobs": 5,
+   "top_cities": [
+    "pune",
+    "gurugram",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Visa",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "visa.wd5.myworkdayjobs.com|visa|visa",
+   "url": "https://visa.wd5.myworkdayjobs.com/visa",
+   "india_jobs": 75,
+   "entry_level_india_jobs": 3,
+   "top_cities": [
+    "bengaluru",
+    "mumbai"
+   ]
+  },
+  {
+   "name": "Cisco",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "cisco.wd5.myworkdayjobs.com|cisco|cisco_careers",
+   "url": "https://cisco.wd5.myworkdayjobs.com/cisco_careers",
+   "india_jobs": 393,
+   "entry_level_india_jobs": 3,
+   "top_cities": [
+    "bengaluru",
+    "mumbai",
+    "pune"
+   ]
+  },
+  {
+   "name": "Micron",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "micron.wd1.myworkdayjobs.com|micron|external",
+   "url": "https://micron.wd1.myworkdayjobs.com/external",
+   "india_jobs": 102,
+   "entry_level_india_jobs": 6,
+   "top_cities": [
+    "hyderabad",
+    "bengaluru"
+   ]
+  },
+  {
+   "name": "Salesforce",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "salesforce.wd12.myworkdayjobs.com|salesforce|external_career_site",
+   "url": "https://salesforce.wd12.myworkdayjobs.com/external_career_site",
+   "india_jobs": 60,
+   "entry_level_india_jobs": 2,
+   "top_cities": [
+    "hyderabad",
+    "bengaluru",
+    "gurugram"
+   ]
+  },
+  {
+   "name": "Philips",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "philips.wd3.myworkdayjobs.com|philips|jobs-and-careers",
+   "url": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers",
+   "india_jobs": 96,
+   "entry_level_india_jobs": 13,
+   "top_cities": [
+    "bengaluru",
+    "pune",
+    "gurugram"
+   ]
+  },
+  {
+   "name": "Invesco",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "invesco.wd1.myworkdayjobs.com|invesco|ivz",
+   "url": "https://invesco.wd1.myworkdayjobs.com/ivz",
+   "india_jobs": 83,
+   "entry_level_india_jobs": 14,
+   "top_cities": [
+    "hyderabad"
+   ]
+  },
+  {
+   "name": "Barclays",
+   "category": "Large employers with fresher roles",
+   "source": "workday",
+   "source_key": "barclays.wd3.myworkdayjobs.com|barclays|external_career_site_barclays",
+   "url": "https://barclays.wd3.myworkdayjobs.com/external_career_site_barclays",
+   "india_jobs": 914,
+   "entry_level_india_jobs": 4,
+   "top_cities": [
+    "pune",
+    "gurugram",
+    "chennai"
+   ]
+  }
+ ]
+}

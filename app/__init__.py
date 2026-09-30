@@ -1,0 +1,1 @@
+"""TheWatcher application package."""
