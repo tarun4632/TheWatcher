@@ -473,7 +473,9 @@ def find_company_by_url(url: str):
 def list_companies():
     q = """
     SELECT c.*,
-           SUM(CASE WHEN j.status = 'open' AND j.verdict != 'out_of_area' THEN 1 ELSE 0 END) AS open_jobs,
+           SUM(CASE WHEN j.status = 'open' AND j.verdict NOT IN ('out_of_area', 'wrong_level') THEN 1 ELSE 0 END)
+                                                                                              AS open_jobs,
+           SUM(CASE WHEN j.status = 'open' AND j.verdict IN ('pending', 'error') THEN 1 ELSE 0 END) AS pending_jobs,
            SUM(CASE WHEN j.status = 'open' AND j.verdict = 'eligible' THEN 1 ELSE 0 END)     AS eligible_jobs,
            SUM(CASE WHEN j.status = 'open' AND j.verdict = 'skipped' THEN 1 ELSE 0 END)      AS skipped_jobs,
            SUM(CASE WHEN j.status = 'open' AND j.verdict = 'out_of_area' THEN 1 ELSE 0 END)  AS away_jobs,
@@ -535,6 +537,14 @@ def update_job(job_id: int, **fields):
         c.execute(f"UPDATE jobs SET {cols} WHERE id = ?", (*fields.values(), job_id))
 
 
+def count_to_evaluate(company_id: int) -> int:
+    """How many jobs are waiting to be scored now (for the dashboard's 'x of y')."""
+    with conn() as c:
+        return c.execute(
+            "SELECT COUNT(*) FROM jobs WHERE company_id = ? AND status = 'open' AND verdict IN ('pending', 'error') "
+            "AND (next_attempt_at IS NULL OR next_attempt_at <= ?)", (company_id, now())).fetchone()[0]
+
+
 def jobs_to_evaluate(company_id: int, limit: int):
     with conn() as c:
         rows = c.execute(
@@ -567,6 +577,7 @@ def _level_clause(level_group: str | None):
     levels = LEVEL_GROUPS.get(level_group or "")
     if not levels:
         return "", []
+    # Jobs not scored yet have no level, so they appear under All roles only.
     return f"j.job_level IN ({','.join('?' * len(levels))})", list(levels)
 
 

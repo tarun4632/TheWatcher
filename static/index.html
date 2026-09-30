@@ -146,6 +146,10 @@
   .v-related { background: var(--warm-soft); color: var(--warm); }
   .v-not_related { color: var(--cold); }
   .v-pending { color: var(--muted); border: 1px dashed var(--line); }
+  .v-evaluating { color: var(--good); border: 1px solid var(--good); animation: pulse 1.4s ease-in-out infinite; }
+  .live { color: var(--good); font-weight: 500; }
+  @keyframes pulse { 50% { opacity: .45; } }
+  @media (prefers-reduced-motion: reduce) { .v-evaluating { animation: none; } }
   .v-error, .v-failed { background: var(--bad-soft); color: var(--bad); }
   .facts { margin-top: 6px; }
   .review { background: var(--warm-soft); border: 1px solid var(--warm); border-radius: var(--radius);
@@ -249,6 +253,7 @@
   <h1>TheWatcher</h1>
   <div class="status signed-in" id="status">Loading…</div>
   <div class="signed-in">
+    <button class="btn" id="scoreNow" hidden title="Score the jobs already found, without reading the careers sites again">Score waiting jobs</button>
     <button class="btn primary" id="checkAll">Check all companies now</button>
     <span class="who" id="who"></span>
     <button class="btn small" id="changePw">Account</button>
@@ -499,8 +504,16 @@ function profileSummary(p) {
 function renderState() {
   const s = state.settings;
   const checking = state.checking.length;
+  const live = state.checking.map((id) => {
+    const c = state.companies.find((x) => x.id === id);
+    return c ? `${c.name}: ${progressText(c) || "checking…"}` : "";
+  }).filter(Boolean);
+  const waiting = state.companies.filter((c) => c.pending_jobs && !state.checking.includes(c.id))
+    .reduce((n, c) => n + c.pending_jobs, 0);
+  $("scoreNow").hidden = !waiting;
+  $("scoreNow").textContent = `Score ${waiting} waiting job${waiting === 1 ? "" : "s"}`;
   $("status").textContent = checking
-    ? `Checking ${checking} compan${checking === 1 ? "y" : "ies"}…`
+    ? live.join(" · ") || `Checking ${checking} compan${checking === 1 ? "y" : "ies"}…`
     : `${state.profile.career_stage === "fresher" ? "Fresher" : "Experienced"} profile. Checks every ${s.interval_minutes} min, next ${until(s.next_check_at)}.`
       + (s.gemini_ready ? ` Gemini ${s.gemini_usage.used} of ${s.gemini_usage.limit} today.` : "");
 
@@ -548,11 +561,12 @@ function renderState() {
     const busy = state.checking.includes(c.id);
     return `<div class="company">
       <div class="company-top"><span class="company-name">${esc(c.name)}</span><span class="tag">${esc(c.source)}</span></div>
-      <div class="company-meta">${busy ? "Checking now…" : `Checked ${ago(c.last_checked_at)}`}.
+      <div class="company-meta">${busy ? `<span class="live">${esc(progressText(c) || "Checking now…")}</span><br>` : `Checked ${ago(c.last_checked_at)}.`}
         ${c.open_jobs || 0} open, ${c.eligible_jobs || 0} eligible${hiddenNote(c)}
         ${c.last_error ? `<br><span class="err">${esc(c.last_error)}</span>` : ""}</div>
       <div class="company-actions">
         <button class="btn small" data-check="${c.id}" ${busy ? "disabled" : ""}>Check now</button>
+        ${c.pending_jobs && !busy ? `<button class="btn small" data-score-now="${c.id}" title="Score the jobs already found, without reading the careers site again">Score ${c.pending_jobs} waiting</button>` : ""}
         <a class="btn small" href="${esc(c.url)}" target="_blank" rel="noopener" style="text-decoration:none">Careers page</a>
         <button class="btn small" data-remove="${c.id}">Stop watching</button>
       </div>
@@ -572,6 +586,20 @@ function renderState() {
 
   $("events").innerHTML = state.events.map((e) =>
     `<li class="${esc(e.level)}"><time>${ago(e.ts)}</time> ${esc(e.message)}</li>`).join("");
+}
+
+// What a running check is doing right now (from /api/state "progress").
+function progressText(c) {
+  const p = state?.progress?.[c.id];
+  if (!p) return "";
+  if (p.stage !== "Scoring") return `${p.stage}…`;
+  return `Scoring ${p.done} of ${p.total}: “${p.job_title}” (${(p.step || "").replace(/^./, (x) => x.toLowerCase())})`;
+}
+function evaluatingIds() {
+  return new Set(Object.values(state?.progress || {}).map((p) => p.job_id).filter(Boolean));
+}
+function stepFor(jobId) {
+  return Object.values(state?.progress || {}).find((p) => p.job_id === jobId)?.step || "";
 }
 
 // Why a company with jobs can show "0 open": say what was found and hidden.
@@ -602,7 +630,7 @@ function renderStarter(list) {
         const busy = state.checking.includes(c.id);
         const snap = c.snapshot;
         const meta = c.last_checked_at
-          ? `${busy ? "Checking now" : `Checked ${ago(c.last_checked_at)}`}. ${c.open_jobs || 0} open in your area${c.eligible_jobs ? `, ${c.eligible_jobs} eligible` : ""}${hiddenNote(c)}`
+          ? `${busy ? `<span class="live">${esc(progressText(c) || "Checking now")}</span><br>` : `Checked ${ago(c.last_checked_at)}. `}${c.open_jobs || 0} open in your area${c.eligible_jobs ? `, ${c.eligible_jobs} eligible` : ""}${hiddenNote(c)}`
           : snap ? `${snap.india_jobs} India openings, ${snap.entry_level_india_jobs} entry-level${snap.top_cities?.length ? ` (${snap.top_cities.join(", ")})` : ""}` : "Not checked yet";
         return `<div class="sc ${c.active ? "" : "paused"}">
           <input type="checkbox" ${c.active ? "checked" : ""} data-toggle="${c.id}" aria-label="Watch ${esc(c.name)}">
@@ -610,6 +638,7 @@ function renderStarter(list) {
           <span class="sc-meta">${meta}${c.last_error ? `<br><span class="err">${esc(c.last_error)}</span>` : ""}</span>
           <span class="sc-actions">
             ${c.active ? `<button class="linkbtn" data-check="${c.id}" ${busy ? "disabled" : ""}>Check now</button>` : ""}
+            ${c.pending_jobs && !busy ? `<button class="linkbtn" data-score-now="${c.id}">Score ${c.pending_jobs} waiting</button>` : ""}
             ${c.skipped_jobs ? `<button class="linkbtn" data-score="${c.id}">Score current openings (${c.skipped_jobs})</button>` : ""}
             <a href="${esc(c.url)}" target="_blank" rel="noopener">Careers page</a>
           </span>
@@ -645,7 +674,9 @@ async function renderJobs() {
         <div class="job-sub">${esc(j.company)}${j.location ? `, ${esc(j.location)}` : ""}${j.job_level ? `<span class="lvl">${LEVEL_LABEL[j.job_level] || esc(j.job_level)}</span>` : ""}</div>
       </div>
       <div class="job-right">${meter(j.fit_score, j.verdict)}
-        <span class="verdict v-${esc(j.verdict)}">${VERDICT_LABEL[j.verdict] || esc(j.verdict)}</span></div>
+        ${evaluatingIds().has(j.id)
+          ? `<span class="verdict v-evaluating" title="${esc(stepFor(j.id))}">Evaluating…</span>`
+          : `<span class="verdict v-${esc(j.verdict)}">${VERDICT_LABEL[j.verdict] || esc(j.verdict)}</span>`}</div>
       <div class="job-detail">
         ${reasons ? `<ul>${reasons}</ul>` : ""}
         <a class="apply" href="${esc(j.url)}" target="_blank" rel="noopener">Open the job posting</a>
@@ -678,8 +709,12 @@ async function refresh() {
 
 // --- events -----------------------------------------------------------------
 document.addEventListener("click", async (ev) => {
-  const t = ev.target.closest("[data-level],[data-tab],[data-check],[data-remove],[data-copy],[data-job],[data-cat],[data-score],[data-restore],[data-review],[data-rm-work]");
+  const t = ev.target.closest("[data-level],[data-tab],[data-check],[data-remove],[data-copy],[data-job],[data-cat],[data-score],[data-score-now],[data-restore],[data-review],[data-rm-work]");
   if (!t) return;
+  if (t.dataset.scoreNow) {
+    await api(`/api/companies/${t.dataset.scoreNow}/score`, { method: "POST" });
+    toast("Scoring the waiting jobs now"); setTimeout(refresh, 600); return;
+  }
   if (t.dataset.review !== undefined) { openProfile(); return; }
   if (t.dataset.rmWork !== undefined) { t.closest(".wh").remove(); autoYears(); return; }
   if (t.dataset.cat !== undefined) {
@@ -727,6 +762,11 @@ document.addEventListener("toggle", (ev) => {
 $("starterSearch").addEventListener("input", () => state && renderStarter(state.companies.filter((c) => c.is_default)));
 
 $("checkAll").onclick = async () => { await api("/api/check-all", { method: "POST" }); toast("Checking all companies"); setTimeout(refresh, 600); };
+$("scoreNow").onclick = async () => {
+  const r = await api("/api/score-now", { method: "POST" });
+  toast(r.companies ? `Scoring waiting jobs at ${r.companies} compan${r.companies === 1 ? "y" : "ies"}` : "No jobs are waiting");
+  setTimeout(refresh, 600);
+};
 
 $("addForm").onsubmit = async (ev) => {
   ev.preventDefault();

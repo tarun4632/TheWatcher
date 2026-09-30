@@ -127,7 +127,8 @@ def test_facts_override_misleading_text(monkeypatch):
     prefs = {"career_stage": "experienced", "years_experience": 4}
     job = {"title": "Backend Engineer", "description": desc}
     assert matcher.evaluate("r", {"name": "A"}, job, prefs, facts)["verdict"] == "eligible"
-    assert matcher.evaluate("r", {"name": "A"}, job, prefs, None)["verdict"] == "related"  # old text rule
+    # Without Gemini the text rule reads "15 years" as a requirement, far beyond 4 years: hidden.
+    assert matcher.evaluate("r", {"name": "A"}, job, prefs, None)["verdict"] == "wrong_level"
 
 
 def test_resume_facts_fill_blank_profile(monkeypatch):

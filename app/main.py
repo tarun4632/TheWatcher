@@ -221,6 +221,7 @@ def state(level: str | None = None):
     return {
         "companies": companies,
         "checking": [i for i in monitor.running_ids() if i in mine],
+        "progress": monitor.progress(mine),  # {company id: {stage, job_id, job_title, step, done, total}}
         "resume": {"filename": r["filename"], "uploaded_at": r["uploaded_at"], "chars": len(r["text"]),
                    "facts": r["facts"]} if r else None,
         "preferences": db.get_setting("preferences", {}) or {},
@@ -288,6 +289,20 @@ def check_company(company_id: int):
         raise HTTPException(404, "Company not found.")
     monitor.submit_check(company_id)
     return {"ok": True}
+
+
+@app.post("/api/companies/{company_id}/score")
+def score_company(company_id: int):
+    """Score this company's waiting jobs now, without reading its careers site again."""
+    if not db.get_company(company_id):
+        raise HTTPException(404, "Company not found.")
+    monitor.submit_score(company_id)
+    return {"ok": True}
+
+
+@app.post("/api/score-now")
+def score_now():
+    return {"ok": True, "companies": monitor.submit_score_all()}
 
 
 class ActiveIn(BaseModel):

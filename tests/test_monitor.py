@@ -161,3 +161,68 @@ def test_gemini_location_check_skips_scoring(fresh_db, monkeypatch):
         row = dict(c.execute("SELECT verdict, reasons, facts FROM jobs").fetchone())
     assert row["verdict"] == "out_of_area"
     assert "US only" in row["reasons"] and row["facts"]
+
+
+def test_one_check_scores_the_whole_queue_in_batches(fresh_db, monkeypatch):
+    monkeypatch.setattr(config, "MAX_EVALS_PER_RUN", 2)
+    monkeypatch.setattr(monitor.scrapers, "fetch_jobs", lambda company, india_only=False: (
+        [_job(f"j{i}") for i in range(5)], None))
+    monkeypatch.setattr(monitor.config, "kev_configured", lambda: True)
+    monkeypatch.setattr(monitor.config, "email_configured", lambda: False)
+    monkeypatch.setattr(monitor.scrapers, "fetch_description", lambda company, job: "Build APIs. " * 10)
+    monkeypatch.setattr(monitor.extract, "job_facts", lambda company, job: None)
+    scored = []
+
+    def evaluate(resume_text, company, job, prefs, facts=None, **kw):
+        scored.append(job["external_id"])
+        if job["external_id"] == "j3":
+            raise RuntimeError("temporary failure")
+        return {"verdict": "related", "job_level": "fresher", "related_p": .8, "eligible_p": .4, "blocker_p": None,
+                "fit_score": 2, "seniority": None, "reasons": [], "model": "test"}
+    monkeypatch.setattr(monitor.matcher, "evaluate", evaluate)
+    db.save_resume("cv.txt", "resume")
+    cid = db.add_company("Acme", "https://example.com/jobs", "greenhouse", "acme")
+    monitor.check_company(cid)
+    assert sorted(scored) == ["j0", "j1", "j2", "j3", "j4"]  # 3 batches of 2, one check
+    assert {r["verdict"] for r in _rows()} == {"related", "error"}  # j3 waits for its retry, not retried in a loop
+
+
+def test_progress_shows_which_job_is_being_scored(fresh_db, monkeypatch):
+    monkeypatch.setattr(monitor.scrapers, "fetch_jobs", lambda company, india_only=False: ([_job("a"), _job("b")], None))
+    monkeypatch.setattr(monitor.config, "kev_configured", lambda: True)
+    monkeypatch.setattr(monitor.config, "email_configured", lambda: False)
+    monkeypatch.setattr(monitor.scrapers, "fetch_description", lambda company, job: "Build APIs. " * 10)
+    monkeypatch.setattr(monitor.extract, "job_facts", lambda company, job: None)
+    seen = []
+
+    def evaluate(resume_text, company, job, prefs, facts=None, **kw):
+        seen.append(monitor.progress([company["id"]])[company["id"]])
+        return {"verdict": "related", "job_level": "fresher", "related_p": .8, "eligible_p": .4, "blocker_p": None,
+                "fit_score": 2, "seniority": None, "reasons": [], "model": "test"}
+    monkeypatch.setattr(monitor.matcher, "evaluate", evaluate)
+    db.save_resume("cv.txt", "resume")
+    cid = db.add_company("Acme", "https://example.com/jobs", "greenhouse", "acme")
+    monitor.check_company(cid)
+    assert [(p["stage"], p["done"], p["total"]) for p in seen] == [("Scoring", 1, 2), ("Scoring", 2, 2)]
+    assert seen[0]["job_title"] in ("Role a", "Role b") and seen[0]["step"].startswith("Kev is checking")
+    assert monitor.progress([cid]) == {}  # cleared when the check ends
+
+
+def test_score_now_scores_saved_jobs_without_reading_the_site(fresh_db, monkeypatch):
+    monkeypatch.setattr(monitor.config, "kev_configured", lambda: True)
+    monkeypatch.setattr(monitor.config, "email_configured", lambda: False)
+    monkeypatch.setattr(monitor.scrapers, "fetch_description", lambda company, job: "Build APIs. " * 10)
+    monkeypatch.setattr(monitor.extract, "job_facts", lambda company, job: None)
+    monkeypatch.setattr(monitor.scrapers, "fetch_jobs", lambda *a, **k: pytest.fail("must not read the careers site"))
+    monkeypatch.setattr(monitor.matcher, "evaluate", lambda *a, **k: {
+        "verdict": "related", "job_level": "fresher", "related_p": .8, "eligible_p": .4, "blocker_p": None,
+        "fit_score": 2, "seniority": None, "reasons": [], "model": "test"})
+    db.save_resume("cv.txt", "resume")
+    cid = db.add_company("Acme", "https://example.com/jobs", "greenhouse", "acme")
+    for e in ("x", "y"):
+        db.insert_job(cid, _job(e), is_baseline=False)
+    assert db.list_companies()[0]["pending_jobs"] == 2
+    assert len(db.list_jobs(verdict="pending")) == 2                       # unscored: under All roles
+    assert db.list_jobs(level_group="fresher", verdict="pending") == []  # not in a level section until scored
+    monitor.score_company(cid)
+    assert {r["verdict"] for r in _rows()} == {"related"} and db.list_companies()[0]["pending_jobs"] == 0

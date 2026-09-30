@@ -156,3 +156,44 @@ def test_eightfold_pages_by_what_comes_back(monkeypatch):
         return httpx.Response(200, json={"count": 25, "positions": positions[start:start + 10]})
     fake_web(monkeypatch, {("GET", "https://ef.test/api/apply/v2/jobs"): api})
     assert [j["title"] for j in scrapers._eightfold("ef.test|acme.com")] == [f"Job {i}" for i in range(25)]
+
+
+def test_a_shuffling_search_is_asked_for_a_fixed_order(monkeypatch):
+    """IBM sorts by popularity, which shifts between requests; sorted by id, paging is complete."""
+    ids = [f"j{i:02d}" for i in range(12)]
+    calls = {"n": 0}
+
+    def search(req):
+        body = json.loads(req.content)
+        calls["n"] += 1
+        order = sorted(ids) if body.get("sort") == [{"_id": "asc"}] else ids[calls["n"] % 3:] + ids[:calls["n"] % 3]
+        start = body.get("from", 0)
+        return httpx.Response(200, json={"hits": {"hits": [
+            {"_id": i, "_source": {"title": f"Job {i}", "url": f"/j/{i}", "loc": "Pune, IN"}}
+            for i in order[start:start + body["size"]]]}})
+    fake_web(monkeypatch, {("POST", "https://api.example.com/search"): search})
+    feed = {"method": "POST", "url": "https://api.example.com/search", "params": {},
+            "body": {"query": {}, "size": 5, "sort": [{"pageviews": "desc"}]}, "list_path": ["hits", "hits"],
+            "fields": {"title": "_source.title", "url": "_source.url", "id": "_id", "location": "_source.loc",
+                       "posted": None, "description": None},
+            "base_url": "https://example.com/", "page": {"where": "body", "param": "from", "start": 0, "step": 5,
+                                                         "size_param": "size", "size": 5}}
+    fixed, note = discover.stable_order(feed)
+    assert fixed["body"]["sort"] == [{"_id": "asc"}] and fixed["order_checked"] and "fixed order" in note
+    assert sorted(j["external_id"] for j in scrapers._json_feed(fixed)) == ids  # all 12, none repeated
+
+
+def test_the_reader_goes_on_past_a_page_of_repeats(monkeypatch):
+    pages = [["a", "b"], ["a", "b"], ["c", "d"], []]  # page 2 repeats page 1 (a shifting order)
+
+    def search(req):
+        page = json.loads(req.content)["from"] // 2
+        return httpx.Response(200, json={"items": [{"id": i, "title": f"Job {i}", "location": "Pune, IN"}
+                                                   for i in pages[page]]})
+    fake_web(monkeypatch, {("POST", "https://api.example.com/jobs"): search})
+    feed = {"method": "POST", "url": "https://api.example.com/jobs", "params": {}, "body": {"size": 2},
+            "list_path": ["items"], "fields": {"title": "title", "url": None, "id": "id", "location": "location",
+                                               "posted": None, "description": None},
+            "base_url": "https://example.com/", "page": {"where": "body", "param": "from", "start": 0, "step": 2,
+                                                         "size_param": "size", "size": 2}}
+    assert [j["external_id"] for j in scrapers._json_feed(feed)] == ["a", "b", "c", "d"]

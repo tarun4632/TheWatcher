@@ -25,6 +25,7 @@ import httpx
 from . import config, ratelimit
 
 OVERQUALIFIED_YEARS = 3       # experienced people with this many years skip entry-level roles
+FAR_BEYOND_YEARS = 3          # a job asking for this many more years than you have is hidden, not a "stretch"
 LEVELS = ("internship", "fresher", "experienced", "senior")
 
 
@@ -125,8 +126,10 @@ def _title_level(title: str) -> str | None:
     t = title.lower()
     if re.search(r"\b(intern|internship|summer analyst|co-?op)\b", t):
         return "internship"
-    if re.search(r"\b(senior|sr\.?|lead|principal|staff|head|director|manager|architect|vp)\b", t):
-        return "senior" if re.search(r"\b(principal|staff|head|director|vp)\b", t) else "experienced"
+    if re.search(r"\b(senior|sr\.?|lead|principal|staff|head|director|vp)\b", t):
+        return "senior"
+    if re.search(r"\b(manager|architect)\b", t):  # "Account Manager" can be a 2-year role
+        return "experienced"
     if re.search(r"\b(graduate|new grad|fresher|entry[- ]level|trainee|apprentice|campus)\b", t):
         return "fresher"
     return None
@@ -144,6 +147,8 @@ def resolve_level(title: str, kev_level: str, kev_conf: float, need_years: float
         return "internship"
     if from_title in ("experienced", "senior") and level in ("internship", "fresher"):
         level = from_title
+    if from_title == "senior" and level == "experienced":  # "Senior …" in the title is a senior role
+        level = "senior"
     if need_years is not None:
         if need_years >= 2 and level in ("internship", "fresher"):
             level = "experienced"
@@ -412,8 +417,15 @@ def level_mismatch(prefs: dict, level: str, need_years: float | None, facts: dic
     mine = _num(prefs.get("years_experience"))
     if level == "internship":
         return "An internship; your profile is an experienced one"
-    if level == "fresher" and mine is not None and mine >= OVERQUALIFIED_YEARS:
+    if mine is None:
+        return None  # years unknown: nothing to compare
+    if level == "fresher" and mine >= OVERQUALIFIED_YEARS:
         return f"An entry-level role; you have {mine:g} years of experience"
+    if level == "senior" and mine < config.SENIOR_ROLE_MIN_YEARS:
+        return (f"A senior role; you have {mine:g} years of experience "
+                f"(senior roles are shown from {config.SENIOR_ROLE_MIN_YEARS:g})")
+    if need_years is not None and need_years >= mine + FAR_BEYOND_YEARS:
+        return f"Asks for {need_years:g}+ years of experience{_quote(facts, 'experience')}; you have {mine:g}"
     return None
 
 
@@ -455,10 +467,11 @@ def standard_checks(stage: str, level: str, prefs: dict, req: dict, facts: dict 
     else:
         mine = _num(prefs.get("years_experience"))
         if need is not None and mine is not None:
-            if mine + 1 < need:
-                blocks.append(f"Asks for {need:g}+ years of experience; you have {mine:g}{_quote(facts, 'experience')}")
+            if need > mine:  # far beyond (FAR_BEYOND_YEARS+) was already hidden by level_mismatch
+                blocks.append(f"A stretch: asks for {need:g}+ years of experience; you have {mine:g}"
+                              f"{_quote(facts, 'experience')}")
             else:
-                notes.append(f"Experience requirement ({need:g}+ years) looks fine")
+                notes.append(f"Experience requirement ({need:g}+ years) met")
     return blocks, notes
 
 

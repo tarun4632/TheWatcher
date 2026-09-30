@@ -569,7 +569,7 @@ def request_page(c: httpx.Client, feed: dict, page_no: int) -> httpx.Response:
     return ratelimit.send(c, feed["method"], feed["url"], **kwargs)
 
 
-MAX_FEED_PAGES = 25
+MAX_FEED_PAGES = 40
 
 
 def _json_feed(feed: dict) -> list[dict]:
@@ -580,16 +580,18 @@ def _json_feed(feed: dict) -> list[dict]:
             r = request_page(c, feed, page_no)
             r.raise_for_status()
             try:
-                items = _at_path(r.json(), feed["list_path"])
+                items = _at_path(r.json(), feed["list_path"]) or []
             except (KeyError, IndexError, TypeError, ValueError):
                 items = []
-            page = [j for j in jobs_from_items(items or [], feed["fields"], feed["base_url"])
-                    if j["external_id"] not in seen]
-            if not page:
+            if not items:
                 break
+            page = [j for j in jobs_from_items(items, feed["fields"], feed["base_url"])
+                    if j["external_id"] not in seen]
             seen.update(j["external_id"] for j in page)
             jobs += page
-            if page_is_all_old(page):
+            # A page of repeats doesn't mean the end (a shifting order can cause it); a short page does.
+            size = (feed.get("page") or {}).get("size")
+            if (size and len(items) < size) or (page and page_is_all_old(page)):
                 break
     return jobs
 

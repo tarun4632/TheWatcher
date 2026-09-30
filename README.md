@@ -188,10 +188,31 @@ Saving your profile or job preferences marks every open job *Not scored yet* aga
 | `eligible` | **Eligible** | In your fields, your level, no rule broken, every must-have met | Eligible tab, All | yes, once |
 | `related` | **Related** | In your field and level, but a must-have or a rule (batch, CGPA, years…) is missing — named in the reasons | Related tab, All | no |
 | `not_related` | **Not a fit** | Kev reads the job as outside the fields in your profile | All | no |
-| `wrong_level` | **Not your level** | e.g. a senior or "3+ years" role for a fresher, an internship for someone experienced | hidden | no |
+| `wrong_level` | **Not your level** | e.g. a senior or "3+ years" role for a fresher, a Staff role for someone with 2 years (see the table below) | hidden | no |
 | `out_of_area` | – | Not in India and not remote-for-India (by the listed location, or by Gemini) | hidden | no |
 | `pending` | **Not scored yet** | Waiting in the queue | Not scored yet tab | – |
 | `error` / `failed` | **Will retry** / **Scoring failed** | Scoring hit an error (see above) | All | no |
+
+### Levels and years
+
+Your profile's **career stage** (fresher or experienced) and **years of full-time work** decide which levels you see. Years come from your work history — internships don't count, overlapping jobs count once — and you can type over them. A job's level is Kev's reading, corrected by code: "Intern" in the title is always an internship; "Senior", "Sr", "Lead", "Staff", "Principal", "Head", "Director" or "VP" is always senior; 2+ years required is never a fresher role; 7+ years is senior.
+
+| Your profile | Internships | Fresher / entry roles | Experienced roles | Senior roles |
+|---|---|---|---|---|
+| **Fresher** (under 1 year) | shown (unless turned off) | shown | hidden | hidden |
+| **Experienced, under 3 years** | hidden | shown | shown | hidden until `SENIOR_ROLE_MIN_YEARS` (5) |
+| **Experienced, 3 to 5 years** | hidden | hidden | shown | hidden until 5 |
+| **Experienced, 5+ years** | hidden | hidden | shown | shown |
+
+Within the levels you see, the posting's years decide the rest (for experienced profiles):
+
+| The job asks for | You have 2 years | Result |
+|---|---|---|
+| 2 years or less | ✓ | can be **Eligible** ("Experience requirement met") |
+| a little more (up to 2 years more) | e.g. 3 or 4 | **Related** — *"A stretch: asks for 3+ years; you have 2"* — never emailed |
+| far more (3+ years more) | e.g. 5 or 8 | hidden as **Not your level** |
+
+If your years aren't known, senior roles and years can't be compared, so they aren't hidden.
 
 ### Reading a company's card
 
@@ -447,6 +468,7 @@ Everything is set in `.env` (see [`.env.example`](.env.example)). Restart after 
 | `MAX_EVALS_PER_RUN` | `150` | Jobs scored per company check; the rest wait |
 | `RELATED_THRESHOLD` | `0.5` | How sure Kev must be that a job is in your fields |
 | `ELIGIBLE_THRESHOLD` | `0.5` | How sure Kev must be that you meet each must-have |
+| `SENIOR_ROLE_MIN_YEARS` | `5` | Experienced profiles see senior roles from this many years |
 | `JOB_BOARD_RPS` | `2` | Requests per second to any one careers site |
 | `KEV_RPM` / `SMTP_PER_MINUTE` | `60` / `20` | Caps for Kev and email |
 | `RETRY_MAX_ATTEMPTS` / `RETRY_MAX_WAIT_SECONDS` | `4` / `90` | Per-request retries with backoff |
@@ -569,7 +591,7 @@ app/
 static/index.html            The dashboard (a single page, no build step)
 tools/try_kev.py             Score two sample jobs with Kev — checks your setup
 tools/build_starter_list.py  Rebuilds the starter list from fresh data
-tests/                       90 tests; no network, no Kev, no Gemini needed
+tests/                       98 tests; no network, no Kev, no Gemini needed
 ```
 
 ## Tests
@@ -588,6 +610,7 @@ The tests use a temporary database, fake careers sites (httpx `MockTransport`) a
 - **Kev-0.8B is small.** It's right ~91–97% of the time on the questions it's asked here, not 100%. Borderline roles (a product manager for an API platform, a trader who codes) can be judged either way. Treat Eligible as a strong hint and read the posting.
 - **Gemini's free tier** may use your requests, including your resume, to improve Google's products.
 - **Kev only knows your profile.** A skill that isn't in your profile is a missing requirement.
+- **Without Gemini, years come from text rules**, which can misread a sentence like "we have 15 years of experience in fintech" as a requirement and hide the job as far beyond your years. Gemini reads these correctly, so keep a key set if you can.
 
 ## Troubleshooting
 

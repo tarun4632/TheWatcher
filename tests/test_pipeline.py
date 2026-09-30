@@ -224,3 +224,36 @@ def test_wrong_level_jobs_are_hidden_and_cost_no_gemini(one_job, kev, monkeypatc
     monitor.check_company(cid)
     assert _row()["verdict"] == "wrong_level" and gemini == []
     assert db.list_jobs() == [] and db.verdict_counts().get("related", 0) == 0
+
+
+# --- experienced profiles with a few years: senior roles and far-off asks are hidden ----------
+def test_levels_for_an_experienced_profile_with_few_years(kev, monkeypatch):
+    monkeypatch.setattr(config, "SENIOR_ROLE_MIN_YEARS", 5)
+    kev(level="experienced", has=["Python", "REST APIs", "Computer Science"])
+    me = {**PROFILE, "career_stage": "experienced", "years_experience": 1.5}
+    card = {**CARD, "level": None}
+
+    def verdict(title, years=None):
+        return matcher.evaluate("", {"name": "A"}, {**JOB, "title": title}, me, {**card, "min_years": years})
+
+    senior = verdict("Senior Software Engineer")
+    assert senior["verdict"] == "wrong_level" and "senior roles are shown from 5" in senior["reasons"][0]
+    assert verdict("Principal Engineer")["verdict"] == "wrong_level"      # no years stated: the old gap
+    assert verdict("Backend Engineer", 5)["verdict"] == "wrong_level"      # 5 >= 1.5 + 3: far beyond
+    stretch = verdict("Backend Engineer", 3)
+    assert stretch["verdict"] == "related" and any(r.startswith("A stretch: asks for 3+ years") for r in stretch["reasons"])
+    assert verdict("Backend Engineer", 1)["verdict"] == "eligible"
+
+
+def test_senior_roles_show_from_the_configured_years(kev, monkeypatch):
+    kev(level="experienced", has=["Python", "REST APIs", "Computer Science"])
+    card = {**CARD, "level": None, "min_years": None}
+    job = {**JOB, "title": "Senior Software Engineer"}
+    six = {**PROFILE, "career_stage": "experienced", "years_experience": 6}
+    assert matcher.evaluate("", {"name": "A"}, job, six, card)["verdict"] == "eligible"
+    unknown = {**PROFILE, "career_stage": "experienced", "years_experience": None}
+    assert matcher.evaluate("", {"name": "A"}, job, unknown, card)["verdict"] == "eligible"  # can't compare
+    monkeypatch.setattr(config, "SENIOR_ROLE_MIN_YEARS", 2)
+    two = {**PROFILE, "career_stage": "experienced", "years_experience": 2.5}
+    assert matcher.evaluate("", {"name": "A"}, job, two, card)["verdict"] == "eligible"
+    assert matcher.level_mismatch(six, "fresher", None) == "An entry-level role; you have 6 years of experience"

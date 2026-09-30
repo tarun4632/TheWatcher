@@ -32,6 +32,22 @@ def running_ids() -> list[int]:
         return sorted(_running)
 
 
+# What each running check is doing right now, for the dashboard: the stage, and while scoring,
+# which job, which step, and how far through the queue it is.
+_progress: dict[int, dict] = {}
+
+
+def _set_progress(company_id: int, **fields) -> None:
+    with _running_lock:
+        _progress.setdefault(company_id, {}).update(fields, updated_at=datetime.now(timezone.utc).isoformat(
+            timespec="seconds"))
+
+
+def progress(company_ids) -> dict[int, dict]:
+    with _running_lock:
+        return {i: dict(_progress[i]) for i in company_ids if i in _progress}
+
+
 def check_company(company_id: int) -> dict:
     """Check one company as its owner: their resume, profile and alert addresses."""
     company = db.get_company_any(company_id)
@@ -47,9 +63,44 @@ def check_company(company_id: int) -> dict:
     finally:
         with _running_lock:
             _running.discard(company_id)
+            _progress.pop(company_id, None)
+
+
+def score_company(company_id: int) -> dict:
+    """Score the jobs already saved for a company, without reading its careers site again."""
+    company = db.get_company_any(company_id)
+    if not company or company["user_id"] is None:
+        return {"error": "company not found"}
+    with _running_lock:
+        if company_id in _running:
+            return {"skipped": "already checking"}
+        _running.add(company_id)
+    try:
+        with db.as_user(company["user_id"]):
+            company = db.get_company(company_id)
+            return {"emailed": _evaluate_pending(company, {})}
+    finally:
+        with _running_lock:
+            _running.discard(company_id)
+            _progress.pop(company_id, None)
 
 
 REDISCOVER_AFTER_HOURS = 6  # a recipe that broke is re-worked out at most this often
+MAX_SCORED_PER_CHECK = 3000  # a safety stop; normally the queue simply runs empty
+
+
+def _queue(company_id: int):
+    """Jobs waiting to be scored, MAX_EVALS_PER_RUN at a time, until none are left. Each job is
+    tried at most once per check, so a failed one waits for its retry time instead of looping."""
+    tried: set[int] = set()
+    while len(tried) < MAX_SCORED_PER_CHECK:
+        batch = [j for j in db.jobs_to_evaluate(company_id, config.MAX_EVALS_PER_RUN + len(tried))
+                 if j["id"] not in tried][:config.MAX_EVALS_PER_RUN]
+        if not batch:
+            return
+        for job in batch:
+            tried.add(job["id"])
+            yield job
 
 
 def _recipe(company: dict) -> dict:
@@ -84,10 +135,21 @@ def _check(company_id: int) -> dict:
         return {"error": "company not found"}
     name = company["name"]
     if _needs_discovery(company):
+        _set_progress(company_id, stage="Working out where the jobs are")
         try:
             _discover(company)
         except Exception as e:  # noqa: BLE001 - fall back to reading the page as it is
             db.log(f"{name}: couldn't work out where the jobs are: {e}", "warn")
+    recipe = _recipe(company)
+    if company["source"] == "json" and not recipe.get("feed", {}).get("order_checked"):
+        try:
+            recipe["feed"], note = discover.stable_order(recipe["feed"])
+            db.update_company(company_id, recipe=json.dumps(recipe))
+            company["recipe"] = recipe
+            if note:
+                db.log(f"{name}: {note}")
+        except Exception as e:  # noqa: BLE001 - keep the recipe as it was
+            db.log(f"{name}: couldn't check the job list's order: {e}", "warn")
     if company["source"] == "unsupported":  # e.g. jobs only on LinkedIn: said once, not every check
         db.update_company(company_id, last_checked_at=db.now(),
                           last_error=(_recipe(company).get("reason") or "Can't be read automatically")[:500])
@@ -95,6 +157,7 @@ def _check(company_id: int) -> dict:
 
     prefs = db.get_setting("preferences", {}) or {}
     india_only = prefs.get("india_only", True)
+    _set_progress(company_id, stage="Reading the job list")
     try:
         jobs, upgraded = scrapers.fetch_jobs(company, india_only=india_only)
         jobs = [j for j in jobs if scrapers.is_recent(j.get("posted_at"))]
@@ -159,7 +222,15 @@ def _evaluate_pending(company: dict, current: dict) -> int:
     emailed = 0
     card = matcher.profile_card(prefs, resume["text"])
     my_fields = None  # your fields: from your profile, or read by Kev the first time they're needed
-    for job in db.jobs_to_evaluate(company["id"], config.MAX_EVALS_PER_RUN):
+    total, done = db.count_to_evaluate(company["id"]), 0
+
+    def step(text: str):
+        _set_progress(company["id"], step=text)
+
+    for job in _queue(company["id"]):
+        done += 1
+        _set_progress(company["id"], stage="Scoring", job_id=job["id"], job_title=job["title"],
+                      done=done, total=max(total, done), step="Reading the posting")
         if not job["description"]:
             fresh = current.get(job["external_id"], {})
             desc = fresh.get("description") or scrapers.fetch_description(company, job)
@@ -171,6 +242,7 @@ def _evaluate_pending(company: dict, current: dict) -> int:
             # Kev reads the job alone (field and level); kept on the job, since it doesn't depend on you.
             kev_job = job.get("kev_job")
             if kev_job is None:
+                step("Kev is reading the job (field and level)")
                 kev_job = matcher.classify_job(job)
                 db.update_job(job["id"], kev_job=kev_job)
             if my_fields is None:
@@ -181,6 +253,7 @@ def _evaluate_pending(company: dict, current: dict) -> int:
                     and not matcher.level_mismatch(prefs, matcher.early_level(job, kev_job), None)):
                 # In your fields and at your level: only now is it worth a Gemini call.
                 if facts is None:
+                    step("Gemini is writing the job card")
                     facts = extract.job_facts(company, job)
                     if facts:
                         db.update_job(job["id"], facts=facts)
@@ -189,6 +262,7 @@ def _evaluate_pending(company: dict, current: dict) -> int:
                     db.update_job(job["id"], verdict="out_of_area", evaluated_at=db.now(),
                                   reasons=["Not open to people in India" + (f' ("{quote}")' if quote else "")])
                     continue
+            step("Kev is checking your profile against the requirements")
             result = matcher.evaluate(resume["text"], company, job, prefs, facts, kev_job=kev_job)
         except Exception as e:  # noqa: BLE001
             if isinstance(e, matcher.KevError) and e.stop_run:
@@ -251,6 +325,18 @@ def submit_check_all():
     for c in db.list_companies():
         if c["active"]:
             _pool.submit(check_company, c["id"])
+
+
+def submit_score(company_id: int):
+    return _pool.submit(score_company, company_id)
+
+
+def submit_score_all() -> int:
+    """Score the current user's waiting jobs now, company by company. Returns how many companies."""
+    waiting = [c for c in db.list_companies() if c.get("pending_jobs")]
+    for c in waiting:
+        _pool.submit(score_company, c["id"])
+    return len(waiting)
 
 
 def submit_check_everyone():

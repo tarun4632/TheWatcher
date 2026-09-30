@@ -298,6 +298,9 @@ class Discovery:
             self.log(f"Found a job list at {resp['url']}, but it came back empty outside a browser")
             return None
         feed["page"] = self._paging(feed, first)
+        feed, note = stable_order(feed, self.client)
+        if note:
+            self.log(note)
         self.log(f"Found the job list the page loads: {feed['method']} {feed['url']} ({len(items)} jobs a page, "
                  f"titles from '{fields['title']}', locations from '{fields.get('location')}'"
                  + (f", paged by '{feed['page']['param']}'" if feed["page"] else ", one page") + ")")
@@ -378,6 +381,44 @@ class Discovery:
         self.log("Couldn't find this company's job list")
         return {"source": "generic", "source_key": "", "recipe": {"list_url": self.url, "steps": self.steps,
                                                                   "not_found": True}}
+
+
+STABLE_SORTS = ([{"_id": "asc"}], [{"_doc": "asc"}])  # Elasticsearch-style search services (e.g. IBM)
+
+
+def stable_order(feed: dict, client: httpx.Client | None = None) -> tuple[dict, str | None]:
+    """Ask a paged search for a fixed order when it accepts one. Sorted by relevance or popularity,
+    results shift between requests, so paging skips some jobs and repeats others (IBM: two full
+    reads differed by 124 jobs; sorted by id they were identical). Returns (feed, log note)."""
+    feed = {**feed, "order_checked": True}
+    body = feed.get("body")
+    if not (feed.get("page") and isinstance(body, dict) and ("sort" in body or "query" in body)):
+        return feed, None
+    own = client or scrapers._client()
+    try:
+        for sort in STABLE_SORTS:
+            trial = {**feed, "body": {**body, "sort": sort}}
+            try:
+                first = [j["external_id"] for j in _read_page(own, trial, 0)]
+                second = [j["external_id"] for j in _read_page(own, trial, 1)]
+            except httpx.HTTPError:
+                continue
+            if first and second and not set(second) <= set(first):
+                return trial, f"Asking the job list for a fixed order ({json.dumps(sort)}), so paging doesn't skip jobs"
+    finally:
+        if client is None:
+            own.close()
+    return feed, None
+
+
+def _read_page(client: httpx.Client, feed: dict, page_no: int) -> list[dict]:
+    r = scrapers.request_page(client, feed, page_no)
+    r.raise_for_status()
+    try:
+        items = scrapers._at_path(r.json(), feed["list_path"])
+    except (KeyError, IndexError, TypeError, ValueError):
+        return []
+    return scrapers.jobs_from_items(items or [], feed["fields"], feed["base_url"])
 
 
 def discover(url: str, name: str) -> dict:

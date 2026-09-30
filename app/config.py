@@ -57,6 +57,8 @@ USE_PLAYWRIGHT = os.getenv("USE_PLAYWRIGHT", "0") == "1"  # for JavaScript-only 
 RELATED_THRESHOLD = _float("RELATED_THRESHOLD", 0.5)
 # How sure Kev must be that you meet each must-have requirement (below it: named as missing).
 ELIGIBLE_THRESHOLD = _float("ELIGIBLE_THRESHOLD", 0.5)
+# Experienced profiles see senior roles (Senior, Staff, Principal, Lead, or 7+ years) from this many years.
+SENIOR_ROLE_MIN_YEARS = _float("SENIOR_ROLE_MIN_YEARS", 5)
 
 # --- Email (SMTP) ----------------------------------------------------------
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
